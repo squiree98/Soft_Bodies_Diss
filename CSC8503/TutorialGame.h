@@ -9,9 +9,12 @@
 
 #include "StateGameObject.h"
 
+#include "Spring.h"
+
 namespace NCL {
 	namespace CSC8503 {
 		class TutorialGame		{
+
 		public:
 			TutorialGame();
 			~TutorialGame();
@@ -38,6 +41,7 @@ namespace NCL {
 			void InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims);
 			void InitOBBAABB();
 			void BridgeConstraintTest(Vector3 startPosition);
+			void SpringTest(Vector3 anchorPos, Vector3 bobPos);
 
 			void InitDefaultFloor();
 
@@ -96,6 +100,8 @@ namespace NCL {
 			}
 
 			GameObject* objClosest = nullptr;
+
+			Spring* mTestSpring;
 		};
 	}
 }

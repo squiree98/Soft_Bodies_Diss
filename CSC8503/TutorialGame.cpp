@@ -82,6 +82,8 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
+	mTestSpring->Update(dt);
+
 	if (!inSelectionMode) {
 		world->GetMainCamera().UpdateCamera(dt);
 	}
@@ -268,6 +270,8 @@ void TutorialGame::InitWorld() {
 	physics->Clear();
 
 	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
+
+	SpringTest(Vector3(0, 100, 0), Vector3(0, 0, 0));
 
 	InitGameExamples();
 	InitDefaultFloor();
@@ -569,6 +573,12 @@ void TutorialGame::BridgeConstraintTest(Vector3 startPosition) {
 	OrientationConstraint* otherConstraint = new OrientationConstraint(previous, end, maxAngleDiff);
 	world->AddConstraint(constraint);
 	world->AddConstraint(otherConstraint);
+}
+
+void TutorialGame::SpringTest(Vector3 anchorPosition, Vector3 bobPosition) {
+	SoftBodyJoint* tempAnchor = new SoftBodyJoint(anchorPosition, 1);
+	SoftBodyJoint* tempBob = new SoftBodyJoint(bobPosition, 1);
+	mTestSpring = new Spring(tempAnchor, tempBob, 1, Vector3(0, 22.5, 0));
 }
 
 /*
