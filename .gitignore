@@ -9,6 +9,7 @@
 /.vs/CSC8503/FileContentIndex/read.lock
 /.vs
 /Build
+/x64
 /CMakeFiles
 /out/build/x64-Debug
 
