@@ -15,11 +15,11 @@ namespace NCL {
 	public:
 		CollisionVolume() {
 			type = VolumeType::Invalid;
-			applyPhysics = false;
+			applyCollisions = false;
 		}
 		~CollisionVolume() {}
 
 		VolumeType type;
-		bool applyPhysics;
+		bool applyCollisions;
 	};
 }

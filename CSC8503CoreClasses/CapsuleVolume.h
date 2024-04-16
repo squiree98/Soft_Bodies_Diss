@@ -9,7 +9,7 @@ namespace NCL {
             this->halfHeight    = halfHeight;
             this->radius        = radius;
             this->type          = VolumeType::Capsule;
-            this->applyPhysics  = true;
+            this->applyCollisions = true;
         };
         ~CapsuleVolume() {
 

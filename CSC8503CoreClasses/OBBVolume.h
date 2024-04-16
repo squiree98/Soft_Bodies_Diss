@@ -8,7 +8,7 @@ namespace NCL {
 		OBBVolume(const Maths::Vector3& halfDims) {
 			type		= VolumeType::OBB;
 			halfSizes	= halfDims;
-			this->applyPhysics = true;
+			this->applyCollisions = true;
 		}
 		~OBBVolume() {}
 

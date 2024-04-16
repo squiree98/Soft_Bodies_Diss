@@ -4,9 +4,10 @@
 using namespace NCL;
 using namespace CSC8503;
 
-PhysicsObject::PhysicsObject(Transform* parentTransform, const CollisionVolume* parentVolume)	{
+PhysicsObject::PhysicsObject(Transform* parentTransform, const CollisionVolume* parentVolume, bool shouldApplyGravity)	{
 	transform	= parentTransform;
 	volume		= parentVolume;
+	applyGravity = shouldApplyGravity;
 
 	inverseMass = 1.0f;
 	elasticity	= 0.8f;

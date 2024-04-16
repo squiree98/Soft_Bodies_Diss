@@ -8,12 +8,12 @@ namespace NCL {
 		SphereVolume(float sphereRadius = 1.0f) {
 			type	= VolumeType::Sphere;
 			radius	= sphereRadius;
-			applyPhysics = true;
+			applyCollisions = true;
 		}
-		SphereVolume(float sphereRadius, bool applyPhysics) {
+		SphereVolume(float sphereRadius, bool applyCollision) {
 			type = VolumeType::Sphere;
 			radius = sphereRadius;
-			this->applyPhysics = applyPhysics;
+			this->applyCollisions = applyCollision;
 		}
 		~SphereVolume() {}
 

@@ -68,6 +68,12 @@ set(Physics
     "PhysicsObject.h"
     "PhysicsSystem.cpp"
     "PhysicsSystem.h"
+    "SoftBodyJoint.cpp"
+    "SoftBodyJoint.h"
+    "Spring.cpp"
+    "Spring.h"
+    "ParticleObject.cpp"
+    "ParticleObject.h"
 )
 source_group("Physics" FILES ${Physics})
 

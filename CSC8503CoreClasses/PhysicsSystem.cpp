@@ -204,7 +204,7 @@ void PhysicsSystem::BasicCollisionDetection() {
 				continue;
 			CollisionDetection::CollisionInfo info;
 			if (CollisionDetection::ObjectIntersection(*i, *j, info)) {
-				if (!((*i)->GetBoundingVolume()->applyPhysics && (*j)->GetBoundingVolume()->applyPhysics))
+				if (!((*i)->GetBoundingVolume()->applyCollisions && (*j)->GetBoundingVolume()->applyCollisions))
 					continue;
 				ImpulseResolveCollision(*info.a, *info.b, info.point);
 				info.framesLeft = numCollisionFrames;
@@ -350,8 +350,10 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 		Vector3 force = object->GetForce();
 		Vector3 accel = force * inverseMass;
 
-		if (applyGravity && inverseMass > 0)
-			accel += gravity;
+		if (object->CheckApplyGravity()) {
+			if (applyGravity && inverseMass > 0)
+				accel += gravity;
+		}
 
 		linearVel += accel * dt;
 		object->SetLinearVelocity(linearVel);
