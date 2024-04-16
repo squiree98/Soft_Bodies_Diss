@@ -26,7 +26,7 @@ TutorialGame::TutorialGame() : controller(*Window::GetWindow()->GetKeyboard(), *
 	physics		= new PhysicsSystem(*world);
 
 	forceMagnitude	= 10.0f;
-	useGravity		= true;
+	useGravity		= false;
 	physics->UseGravity(useGravity);
 	inSelectionMode = false;
 
@@ -116,7 +116,7 @@ void TutorialGame::UpdateGame(float dt) {
 	if (Window::GetKeyboard()->KeyPressed(KeyCodes::K) && selectionObject) {
 		Vector3 rayPos;
 		Vector3 rayDir;
-
+		
 		rayDir = selectionObject->GetTransform().GetOrientation() * Vector3(0, 0, -1);
 
 		rayPos = selectionObject->GetTransform().GetPosition();
@@ -398,6 +398,19 @@ GameObject* TutorialGame::AddAABBCubeToWorld(const Vector3& position, Vector3 di
 	return cube;
 }
 
+ParticleObject* TutorialGame::AddParticleToWorld(const Vector3& position, const float radius) {
+	ParticleObject* particle = new ParticleObject(position, radius);
+
+	particle->SetPhysicsObject(new PhysicsObject(&particle->GetTransform(), particle->GetBoundingVolume()));
+
+	particle->GetPhysicsObject()->SetInverseMass(1);
+	particle->GetPhysicsObject()->InitSphereInertia(false);
+
+	world->AddGameObject(particle);
+
+	return particle;
+}
+
 GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position, const std::string& objectName) {
 	float meshSize		= 1.0f;
 	float inverseMass	= 0.5f;
@@ -576,9 +589,9 @@ void TutorialGame::BridgeConstraintTest(Vector3 startPosition) {
 }
 
 void TutorialGame::SpringTest(Vector3 anchorPosition, Vector3 bobPosition) {
-	SoftBodyJoint* tempAnchor = new SoftBodyJoint(anchorPosition, 1);
-	SoftBodyJoint* tempBob = new SoftBodyJoint(bobPosition, 1);
-	mTestSpring = new Spring(tempAnchor, tempBob, 1, Vector3(0, 22.5, 0));
+	ParticleObject* tempAnchor = AddParticleToWorld(anchorPosition, 1);
+	ParticleObject* tempBob = AddParticleToWorld(bobPosition, 1);
+	mTestSpring = new Spring(tempAnchor, tempBob, .1f, 25);
 }
 
 /*

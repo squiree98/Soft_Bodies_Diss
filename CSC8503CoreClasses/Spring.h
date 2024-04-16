@@ -1,22 +1,22 @@
 #pragma once
-#include "SoftBodyJoint.h"
+#include "ParticleObject.h"
 
 class Spring
 {
 public:
-	Spring(SoftBodyJoint* anchor, SoftBodyJoint* bob, float springConstant, Vector3 restLength);
+	Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, float restLength);
 	~Spring();
 
 	void Update(float dt);
 
 protected:
 
-	SoftBodyJoint* mAnchor;
-	SoftBodyJoint* mBob;
+	ParticleObject* mAnchor;
+	ParticleObject* mBob;
 
 	float mSpringConstant;
 
-	Vector3 mRestLength;
+	float mRestLength;
 
 	// to be calculated per frame to determine offset
 	Vector3 mCurrentLength;
