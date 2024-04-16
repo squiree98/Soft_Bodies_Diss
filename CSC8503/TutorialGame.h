@@ -51,11 +51,11 @@ namespace NCL {
 			void LockedObjectMovement();
 
 			GameObject* AddFloorToWorld(const Vector3& position, const std::string& objectName);
-			GameObject* AddSphereToWorld(const Vector3& position, float radius, bool applyPhysicsfloat, float inverseMass = 10.0f, const std::string& objectName = "");
+			GameObject* AddSphereToWorld(const Vector3& position, float radius, bool applyCollision, float inverseMass = 10.0f, const std::string& objectName = "");
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f, const std::string& objectName = "");
 			GameObject* AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f, const std::string& objectName = "");
 			GameObject* AddAABBCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f, const std::string& objectName = "");
-			ParticleObject* AddParticleToWorld(const Vector3& position, const float radius);
+			ParticleObject* AddParticleToWorld(const Vector3& position, const float radius, bool applyGravity = true);
 
 			GameObject* AddPlayerToWorld(const Vector3& position, const std::string& objectName);
 			GameObject* AddEnemyToWorld(const Vector3& position, const std::string& objectName);

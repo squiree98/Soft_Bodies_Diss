@@ -26,7 +26,7 @@ TutorialGame::TutorialGame() : controller(*Window::GetWindow()->GetKeyboard(), *
 	physics		= new PhysicsSystem(*world);
 
 	forceMagnitude	= 10.0f;
-	useGravity		= false;
+	useGravity		= true;
 	physics->UseGravity(useGravity);
 	inSelectionMode = false;
 
@@ -271,7 +271,7 @@ void TutorialGame::InitWorld() {
 
 	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 
-	SpringTest(Vector3(0, 100, 0), Vector3(0, 0, 0));
+	SpringTest(Vector3(100, 100, 0), Vector3(100, 0, 0));
 
 	InitGameExamples();
 	InitDefaultFloor();
@@ -312,11 +312,11 @@ rigid body representation. This and the cube function will let you build a lot o
 physics worlds. You'll probably need another function for the creation of OBB cubes too.
 
 */
-GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, bool applyPhysics, float inverseMass, const std::string& objectName) {
+GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, bool applyCollision, float inverseMass, const std::string& objectName) {
 	GameObject* sphere = new GameObject(objectName);
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);
-	SphereVolume* volume = new SphereVolume(radius, applyPhysics);
+	SphereVolume* volume = new SphereVolume(radius, applyCollision);
 	sphere->SetBoundingVolume((CollisionVolume*)volume);
 
 	sphere->GetTransform()
@@ -398,10 +398,19 @@ GameObject* TutorialGame::AddAABBCubeToWorld(const Vector3& position, Vector3 di
 	return cube;
 }
 
-ParticleObject* TutorialGame::AddParticleToWorld(const Vector3& position, const float radius) {
+ParticleObject* TutorialGame::AddParticleToWorld(const Vector3& position, const float radius, bool applyGravity) {
 	ParticleObject* particle = new ParticleObject(position, radius);
 
-	particle->SetPhysicsObject(new PhysicsObject(&particle->GetTransform(), particle->GetBoundingVolume()));
+	Vector3 particleSize = Vector3(radius, radius, radius);
+	SphereVolume* volume = new SphereVolume(radius, true);
+	particle->SetBoundingVolume((CollisionVolume*)volume);
+
+	particle->GetTransform()
+		.SetScale(particleSize)
+		.SetPosition(position);
+
+	particle->SetRenderObject(new RenderObject(&particle->GetTransform(), sphereMesh, basicTex, basicShader));
+	particle->SetPhysicsObject(new PhysicsObject(&particle->GetTransform(), particle->GetBoundingVolume(), applyGravity));
 
 	particle->GetPhysicsObject()->SetInverseMass(1);
 	particle->GetPhysicsObject()->InitSphereInertia(false);
@@ -589,9 +598,9 @@ void TutorialGame::BridgeConstraintTest(Vector3 startPosition) {
 }
 
 void TutorialGame::SpringTest(Vector3 anchorPosition, Vector3 bobPosition) {
-	ParticleObject* tempAnchor = AddParticleToWorld(anchorPosition, 1);
+	ParticleObject* tempAnchor = AddParticleToWorld(anchorPosition, 1, false);
 	ParticleObject* tempBob = AddParticleToWorld(bobPosition, 1);
-	mTestSpring = new Spring(tempAnchor, tempBob, .1f, 25);
+	mTestSpring = new Spring(tempAnchor, tempBob, .1f, 40);
 }
 
 /*

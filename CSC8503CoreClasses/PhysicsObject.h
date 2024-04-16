@@ -9,7 +9,7 @@ namespace NCL {
 
 		class PhysicsObject	{
 		public:
-			PhysicsObject(Transform* parentTransform, const CollisionVolume* parentVolume);
+			PhysicsObject(Transform* parentTransform, const CollisionVolume* parentVolume, bool shouldApplyGravity = true);
 			~PhysicsObject();
 
 			Vector3 GetLinearVelocity() const {
@@ -65,6 +65,8 @@ namespace NCL {
 				return inverseInteriaTensor;
 			}
 
+			bool CheckApplyGravity() { return applyGravity; }
+
 		protected:
 			const CollisionVolume* volume;
 			Transform*		transform;
@@ -82,6 +84,8 @@ namespace NCL {
 			Vector3 torque;
 			Vector3 inverseInertia;
 			Matrix3 inverseInteriaTensor;
+
+			bool applyGravity;
 		};
 	}
 }

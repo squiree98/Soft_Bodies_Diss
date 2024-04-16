@@ -22,14 +22,26 @@ Spring::~Spring()
 
 void Spring::Update(float dt)
 {
-	Vector3 springLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
-	if (springLength.y > 0)
-		NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), NCL::Debug::BLUE);
-	else
-		NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), NCL::Debug::MAGENTA);
-	float x = springLength.Length() - mRestLength; // determines how strong the force is (further the spring from rest position, the stronger the force)
+	NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), NCL::Debug::MAGENTA);
 
-	Vector3 force = -1 * mSpringConstant * x;
+	mCurrentLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
+	float displacement = mCurrentLength.Length() - mRestLength;
+
+	// determine the direction of the springs force
+	Vector3 force;
+	switch (displacement > mRestLength)
+	{
+	case(true):
+		force = -(mCurrentLength.Normalised());
+		break;
+	case(false):
+		force = mCurrentLength.Normalised();
+		break;
+	}
+
+	force *= mSpringConstant * displacement;
+
+	NCL::Debug::DrawLine(Vector3(0,0,0), Vector3(0,0,0) + force);
 
 	mBob->GetPhysicsObject()->ApplyLinearImpulse(force);
 }

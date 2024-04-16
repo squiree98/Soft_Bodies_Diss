@@ -1,6 +1,6 @@
-^C:\USERS\SQUIR\DESKTOP\SOFT_BODIES_DISSERTATION\CMAKEFILES\3C4959C0FA892709070860A68D77811E\GENERATE.STAMP.RULE
+^C:\SOFT_BODIES_DISS\CMAKEFILES\FAE11B2FE8CFC91C41585CD7463B5EDB\GENERATE.STAMP.RULE
 setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/squir/Desktop/SOFT_BODIES_DISSERTATION -BC:/Users/squir/Desktop/SOFT_BODIES_DISSERTATION --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/squir/Desktop/SOFT_BODIES_DISSERTATION/SOFT_BODIES_DISSERTATION.sln
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Soft_Bodies_Diss -BC:/Soft_Bodies_Diss --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Soft_Bodies_Diss/SOFT_BODIES_DISSERTATION.sln
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

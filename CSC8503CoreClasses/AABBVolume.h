@@ -10,7 +10,7 @@ namespace NCL {
 		AABBVolume(const Vector3& halfDims) {
 			type		= VolumeType::AABB;
 			halfSizes	= halfDims;
-			this->applyPhysics = true;
+			this->applyCollisions = true;
 		}
 		~AABBVolume() {
 
