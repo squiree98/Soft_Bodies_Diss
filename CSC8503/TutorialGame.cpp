@@ -600,7 +600,7 @@ void TutorialGame::BridgeConstraintTest(Vector3 startPosition) {
 void TutorialGame::SpringTest(Vector3 anchorPosition, Vector3 bobPosition) {
 	ParticleObject* tempAnchor = AddParticleToWorld(anchorPosition, 1);
 	ParticleObject* tempBob = AddParticleToWorld(bobPosition, 1);
-	mTestSpring = new Spring(tempAnchor, tempBob, .1f, 20);
+	mTestSpring = new Spring(tempAnchor, tempBob, .01f, 400);
 }
 
 /*

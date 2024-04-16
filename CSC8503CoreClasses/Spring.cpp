@@ -25,12 +25,12 @@ void Spring::Update(float dt)
 	NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), NCL::Debug::MAGENTA);
 
 	mCurrentLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
-	float displacement = mCurrentLength.Length() - mRestLength;
+	float displacement = mCurrentLength.Length() - (mRestLength / 2);
 	displacement = abs(displacement);
 
 	// determine the direction of the springs force
 	Vector3 force;
-	switch (displacement > mRestLength)
+	switch (displacement > (mRestLength / 2))
 	{
 	case(true):
 		force = -(mCurrentLength.Normalised());
@@ -41,9 +41,6 @@ void Spring::Update(float dt)
 	}
 
 	force *= mSpringConstant * displacement;
-
-	//NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mBob->GetTransform().GetPosition() + force, NCL::Debug::RED);
-	//NCL::Debug::DrawLine(mAnchor->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition() - force, NCL::Debug::CYAN);
 
 	mBob->GetPhysicsObject()->ApplyLinearImpulse(force);
 	mAnchor->GetPhysicsObject()->ApplyLinearImpulse(-force);
