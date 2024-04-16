@@ -26,7 +26,7 @@ TutorialGame::TutorialGame() : controller(*Window::GetWindow()->GetKeyboard(), *
 	physics		= new PhysicsSystem(*world);
 
 	forceMagnitude	= 10.0f;
-	useGravity		= false;
+	useGravity		= true;
 	physics->UseGravity(useGravity);
 	inSelectionMode = false;
 
@@ -82,7 +82,10 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
-	mTestSpring->Update(dt);
+	for (Spring* x : mTestSprings)
+	{
+		x->Update(dt);
+	}
 
 	if (!inSelectionMode) {
 		world->GetMainCamera().UpdateCamera(dt);
@@ -269,11 +272,13 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
+	// InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 
-	SpringTest(Vector3(100, 100, 0), Vector3(100, 0, 0));
+	// SpringTest(Vector3(100, 100, 0), Vector3(100, 0, 0));
 
-	InitGameExamples();
+	SoftBodyTest();
+
+	//InitGameExamples();
 	InitDefaultFloor();
 }
 
@@ -601,6 +606,56 @@ void TutorialGame::SpringTest(Vector3 anchorPosition, Vector3 bobPosition) {
 	ParticleObject* tempAnchor = AddParticleToWorld(anchorPosition, 1);
 	ParticleObject* tempBob = AddParticleToWorld(bobPosition, 1);
 	mTestSpring = new Spring(tempAnchor, tempBob, .01f, 400);
+}
+
+void TutorialGame::SoftBodyTest()
+{
+	ParticleObject* botBotLeft = AddParticleToWorld(Vector3(25, 25, 25), 1);
+	ParticleObject* botBotRight = AddParticleToWorld(Vector3(75, 25, 25), 1);
+	ParticleObject* botTopLeft = AddParticleToWorld(Vector3(25, 25, 75), 1);
+	ParticleObject* botTopRight = AddParticleToWorld(Vector3(75, 25, 75), 1);
+
+	ParticleObject* topBotLeft = AddParticleToWorld(Vector3(25, 75, 25), 1);
+	ParticleObject* topBotRight = AddParticleToWorld(Vector3(75, 75, 25), 1);
+	ParticleObject* topTopLeft = AddParticleToWorld(Vector3(25, 75, 75), 1);
+	ParticleObject* topTopRight = AddParticleToWorld(Vector3(75, 75, 75), 1);
+
+	Spring* temp1 = new Spring(botBotLeft, botTopLeft, 0.01f, 50);
+	mTestSprings.push_back(temp1);
+	Spring* temp2 = new Spring(botBotRight, botTopRight, 0.01f, 50);
+	mTestSprings.push_back(temp2);
+	Spring* temp3 = new Spring(topBotLeft, topTopLeft, 0.01f, 50);
+	mTestSprings.push_back(temp3);
+	Spring* temp4 = new Spring(topBotRight, topTopRight, 0.01f, 50);
+	mTestSprings.push_back(temp4);
+
+	Spring* temp5 = new Spring(botBotLeft, topBotLeft, 0.01f, 50);
+	mTestSprings.push_back(temp5);
+	Spring* temp6 = new Spring(botBotRight, topBotRight, 0.01f, 50);
+	mTestSprings.push_back(temp6);
+	Spring* temp7 = new Spring(botTopLeft, topTopLeft, 0.01f, 50);
+	mTestSprings.push_back(temp7);
+	Spring* temp8 = new Spring(botTopRight, topTopRight, 0.01f, 50);
+	mTestSprings.push_back(temp8);
+
+	Spring* temp9 = new Spring(botBotLeft, botBotRight, 0.01f, 50);
+	mTestSprings.push_back(temp9);
+	Spring* temp10 = new Spring(botTopLeft, botTopRight, 0.01f, 50);
+	mTestSprings.push_back(temp10);
+	Spring* temp11 = new Spring(topBotLeft, topBotRight, 0.01f, 50);
+	mTestSprings.push_back(temp11);
+	Spring* temp12 = new Spring(topTopLeft, topTopRight, 0.01f, 50);
+	mTestSprings.push_back(temp12);
+
+	// support springs
+	Spring* x = new Spring(botBotLeft, topTopRight, .1f, 86.6f);
+	mTestSprings.push_back(x);
+	Spring* y = new Spring(botTopRight, topBotLeft, .1f, 86.6f);
+	mTestSprings.push_back(y);
+	Spring* z = new Spring(botBotRight, topTopLeft, .1f, 86.6f);
+	mTestSprings.push_back(z);
+	Spring* a = new Spring(botTopLeft, topBotRight, .1f, 86.6f);
+	mTestSprings.push_back(a);
 }
 
 /*

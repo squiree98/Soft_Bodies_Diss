@@ -42,6 +42,7 @@ namespace NCL {
 			void InitOBBAABB();
 			void BridgeConstraintTest(Vector3 startPosition);
 			void SpringTest(Vector3 anchorPos, Vector3 bobPos);
+			void SoftBodyTest();
 
 			void InitDefaultFloor();
 
@@ -103,6 +104,7 @@ namespace NCL {
 			GameObject* objClosest = nullptr;
 
 			Spring* mTestSpring;
+			vector<Spring*> mTestSprings;
 		};
 	}
 }
