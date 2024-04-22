@@ -62,7 +62,6 @@ void TutorialGame::InitialiseAssets() {
 
 	basicTex	= renderer->LoadTexture("checkerboard.png");
 	basicShader = renderer->LoadShader("scene.vert", "scene.frag");
-	skinnedShader = renderer->LoadShader("SkinningVertex.vert", "scene.frag");
 
 	InitCamera();
 	InitWorld();
@@ -87,6 +86,7 @@ TutorialGame::~TutorialGame()	{
 void TutorialGame::UpdateGame(float dt) {
 
 	softBodyTest->UpdateSoftBody(dt);
+	softBodyTest->UpdateJoints();
 
 	if (!inSelectionMode) {
 		world->GetMainCamera().UpdateCamera(dt);

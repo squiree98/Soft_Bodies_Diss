@@ -17,8 +17,6 @@ set(Source_Files
     "TutorialGame.cpp"
 )
 
-file(GLOB SHADER_FILES ${ASSET_ROOT}/Shaders/*.*)
-
 if(USE_VULKAN)
 list(APPEND Header_Files "GameTechVulkanRenderer.h")
 list(APPEND Source_Files "GameTechVulkanRenderer.cpp")
@@ -35,6 +33,7 @@ source_group("Source Files" FILES ${Source_Files})
 set(ALL_FILES
     ${Header_Files}
     ${Source_Files}
+    ${SHADER_FILES}
 )
 
 if(USE_VULKAN)

@@ -10,7 +10,12 @@ public:
 	SoftBodyJoint(Vector3 position, float radius);
 	~SoftBodyJoint();
 
+	Vector3 GetRelativePosition() const { return relativePosition; }
+
+	void UpdateRelativePos(Vector3 movedDistance);
+
 protected:
 
-
+	Vector3 basePosition;
+	Vector3 relativePosition;;
 };
