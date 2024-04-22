@@ -45,12 +45,18 @@ namespace NCL {
 				return colour;
 			}
 
+			void SetMaterial(int m) {
+				material = m;
+			}
+
 		protected:
 			Mesh*		mesh;
 			Texture*	texture;
 			Shader*		shader;
 			Transform*	transform;
 			Vector4		colour;
+
+			int material;
 		};
 	}
 }

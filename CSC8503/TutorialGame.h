@@ -10,9 +10,11 @@
 #include "StateGameObject.h"
 
 #include "Spring.h"
+#include "SoftBodyObject.h"
 
 namespace NCL {
 	namespace CSC8503 {
+
 		class TutorialGame		{
 
 		public:
@@ -43,6 +45,7 @@ namespace NCL {
 			void BridgeConstraintTest(Vector3 startPosition);
 			void SpringTest(Vector3 anchorPos, Vector3 bobPos);
 			void SoftBodyTest();
+			void SoftBodyCubeTest(SoftBodyObject* softBody);
 
 			void InitDefaultFloor();
 
@@ -56,7 +59,7 @@ namespace NCL {
 			GameObject* AddCapsuleToWorld(const Vector3& position, float halfHeight, float radius, float inverseMass = 10.0f, const std::string& objectName = "");
 			GameObject* AddOBBCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f, const std::string& objectName = "");
 			GameObject* AddAABBCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f, const std::string& objectName = "");
-			ParticleObject* AddParticleToWorld(const Vector3& position, const float radius, bool applyGravity = true);
+			SoftBodyJoint* AddSoftBodyJoint(const Vector3& position, const float radius, const bool applyGravity = true);
 
 			GameObject* AddPlayerToWorld(const Vector3& position, const std::string& objectName);
 			GameObject* AddEnemyToWorld(const Vector3& position, const std::string& objectName);
@@ -88,11 +91,20 @@ namespace NCL {
 
 			Texture*	basicTex	= nullptr;
 			Shader*		basicShader = nullptr;
+			Shader*		skinnedShader = nullptr;
 
 			//Coursework Meshes
 			Mesh*	charMesh	= nullptr;
 			Mesh*	enemyMesh	= nullptr;
 			Mesh*	bonusMesh	= nullptr;
+
+			// soft bodies mesh
+			SoftBodyObject* softBodyTest = nullptr;
+			Mesh* softBodyMesh	= nullptr;
+			MeshMaterial* softBofyMaterial = nullptr;
+			MeshAnimation* tempAnim = nullptr;
+
+			GameObject* temp = nullptr;
 
 			//Coursework Additional functionality	
 			GameObject* lockedObject	= nullptr;
