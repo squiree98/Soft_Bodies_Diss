@@ -280,7 +280,7 @@ void TutorialGame::InitWorld() {
 	// SoftBodyTest();
 
 	softBodyTest = new SoftBodyObject();
-	CreateSoftBodyJoints(cubeMesh, softBodyTest);
+	softBodyTest->CreateJoints(cubeMesh, world);
 
 	//InitGameExamples();
 	InitDefaultFloor();
@@ -408,7 +408,7 @@ GameObject* TutorialGame::AddAABBCubeToWorld(const Vector3& position, Vector3 di
 }
 
 SoftBodyJoint* TutorialGame::AddSoftBodyJoint(const Vector3& position, const float radius, const bool applyGravity) {
-	SoftBodyJoint* particle = new SoftBodyJoint(position, radius);
+	SoftBodyJoint* particle = new SoftBodyJoint(position, radius, world);
 
 	Vector3 particleSize = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(radius, true);
@@ -515,56 +515,6 @@ StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position, co
 	world->AddGameObject(apple);
 
 	return apple;
-}
-
-void TutorialGame::CreateSoftBodyJoints(Mesh* mesh, SoftBodyObject* softBody) {
-	vector<Vector3> previousPositions;
-
-	// ToDo: Move this inside the soft body object class when done
-	int counter = 0;
-	// create joints using vertices
-	for (Vector3 vertPos : mesh->GetPositionData()) {
-		if (!Vector3InVector(previousPositions, vertPos)) {
-			// doesn't exist in soft body
-			previousPositions.push_back(vertPos);
-			SoftBodyJoint* joint = AddSoftBodyJoint(vertPos, 0.1f, false);
-			joint->AddVertIndex(counter);
-			softBody->AddJoint(joint);
-		}
-		else {
-			for (size_t x = 0; x < softBody->GetJoints().size(); x++) {
-				if (softBody->GetJoints()[x]->GetTransform().GetPosition() == vertPos)
-					softBody->GetJoints()[x]->AddVertIndex(counter);
-			}
-		}
-		counter++;
-	}
-
-	counter = 0;
-	// created springs using indices
-	for (unsigned int indicesIndex : mesh->GetIndexData()) {
-		if (counter != mesh->GetIndexData().size() - 1) {
-			SoftBodyJoint* tempJoint1 = softBody->GetJointWithVertIndex(indicesIndex);
-			SoftBodyJoint* tempJoint2 = softBody->GetJointWithVertIndex(indicesIndex + 1);
-			Spring* tempSpring = new Spring(tempJoint1, tempJoint2, 1, 1);
-			bool addSpring = true;
-			for (Spring* spring : softBody->GetSprings()) {
-				if ((tempSpring->GetAnchor() == spring->GetBob() && tempSpring->GetBob() == spring->GetAnchor()) || (tempSpring->GetAnchor() == spring->GetAnchor() && tempSpring->GetBob() == spring->GetBob()))
-					addSpring = false;
-			}
-			if (addSpring)
-				softBody->AddSpring(tempSpring);
-		}
-		counter++;
-	}
-}
-
-bool TutorialGame::Vector3InVector(vector<Vector3> vectorList, Vector3 vectorChecked) {
-	for (Vector3 tempVec : vectorList) {
-		if (tempVec == vectorChecked)
-			return true;
-	}
-	return false;
 }
 
 void TutorialGame::InitDefaultFloor() {

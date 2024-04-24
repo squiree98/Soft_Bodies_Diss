@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameObject.h"
+#include "Mesh.h"
 #include "SoftBodyJoint.h"
 #include "Spring.h"
 
@@ -29,11 +30,14 @@ public:
 
 	void AddSpring(Spring* spring) { softBodySprings.push_back(spring); }
 
+	void CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world);
 protected:
 
 	void UpdateAveragePosition();
 
 	void UpdateSprings(float dt) const;
+
+	
 
 	Vector3 averagePosition;
 	Vector3 basePosition;

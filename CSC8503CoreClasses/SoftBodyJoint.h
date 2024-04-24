@@ -1,4 +1,5 @@
 #pragma once
+#include "GameWorld.h"
 #include "ParticleObject.h"
 
 using namespace NCL::CSC8503;
@@ -7,7 +8,7 @@ class SoftBodyJoint : public ParticleObject
 {
 public:
 	SoftBodyJoint();
-	SoftBodyJoint(Vector3 position, float radius);
+	SoftBodyJoint(Vector3 position, float radius, GameWorld* world);
 	~SoftBodyJoint();
 
 	Vector3 GetRelativePosition() const { return relativePosition; }
