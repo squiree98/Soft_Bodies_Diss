@@ -87,7 +87,7 @@ void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh) {
 					addSpring = false;
 			}
 			if (addSpring) {
-				Spring* tempSpring = new Spring(tempJoint1, tempJoint2, 1, 1);
+				Spring* tempSpring = new Spring(tempJoint1, tempJoint2, 0.07f, (tempJoint1->GetTransform().GetPosition() - tempJoint2->GetTransform().GetPosition()).Length());
 				AddSpring(tempSpring);
 			}
 		}
