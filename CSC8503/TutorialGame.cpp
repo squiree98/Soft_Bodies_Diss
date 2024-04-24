@@ -280,7 +280,7 @@ void TutorialGame::InitWorld() {
 	// SoftBodyTest();
 
 	softBodyTest = new SoftBodyObject();
-	softBodyTest->CreateJoints(softBodyMesh, world);
+	softBodyTest->CreateJoints(cubeMesh, world);
 
 	//InitGameExamples();
 	InitDefaultFloor();

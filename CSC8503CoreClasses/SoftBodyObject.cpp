@@ -61,7 +61,7 @@ void SoftBodyObject::CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world) {
 		if (!CheckVectorHasValue(previousPositions, vertPos)) {
 			// doesn't exist in soft body
 			previousPositions.push_back(vertPos);
-			SoftBodyJoint* joint = new SoftBodyJoint(vertPos, 0.1f, world);
+			SoftBodyJoint* joint = new SoftBodyJoint(vertPos, 1.f, world);
 			joint->AddVertIndex(counter);
 			AddJoint(joint);
 		}
@@ -79,6 +79,7 @@ void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh) {
 	int counter = 0;
 	// created springs using indices
 	for (signed int indicesIndex : mesh->GetIndexData()) {
+		std::cout << counter << std::endl;
 		SoftBodyJoint* tempJoint1 = GetJointWithVertIndex(mesh->GetIndexData()[indicesIndex]);
 		SoftBodyJoint* tempJoint2 = GetJointWithVertIndex(mesh->GetIndexData()[indicesIndex + 1]);
 		bool addSpring = true;
