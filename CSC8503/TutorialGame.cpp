@@ -85,8 +85,8 @@ TutorialGame::~TutorialGame()	{
 
 void TutorialGame::UpdateGame(float dt) {
 
-	softBodyTest->UpdateSoftBody(dt);
-	softBodyTest->UpdateJoints();
+	//softBodyTest->UpdateSoftBody(dt);
+	//softBodyTest->UpdateJoints();
 
 	if (!inSelectionMode) {
 		world->GetMainCamera().UpdateCamera(dt);
@@ -277,7 +277,10 @@ void TutorialGame::InitWorld() {
 
 	// SpringTest(Vector3(100, 100, 0), Vector3(100, 0, 0));
 
-	SoftBodyTest();
+	// SoftBodyTest();
+
+	softBodyTest = new SoftBodyObject();
+	CreateSoftBodyJoints(cubeMesh, softBodyTest);
 
 	//InitGameExamples();
 	InitDefaultFloor();
@@ -415,7 +418,7 @@ SoftBodyJoint* TutorialGame::AddSoftBodyJoint(const Vector3& position, const flo
 		.SetScale(particleSize)
 		.SetPosition(position);
 
-	//particle->SetRenderObject(new RenderObject(&particle->GetTransform(), sphereMesh, basicTex, basicShader));
+	particle->SetRenderObject(new RenderObject(&particle->GetTransform(), sphereMesh, basicTex, basicShader));
 	particle->SetPhysicsObject(new PhysicsObject(&particle->GetTransform(), particle->GetBoundingVolume(), applyGravity));
 
 	particle->GetPhysicsObject()->SetInverseMass(1);
@@ -512,6 +515,27 @@ StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position, co
 	world->AddGameObject(apple);
 
 	return apple;
+}
+
+void TutorialGame::CreateSoftBodyJoints(Mesh* mesh, SoftBodyObject* softBody) {
+	vector<Vector3> previousPositions;
+
+	for (Vector3 vertPos : mesh->GetPositionData()) {
+		if (!Vector3InVector(previousPositions, vertPos)) {
+			// doesn't exist in soft body
+			previousPositions.push_back(vertPos);
+			SoftBodyJoint* joint = AddSoftBodyJoint(vertPos, 0.1f, false);
+			softBody->AddJoint(joint);
+		}
+	}
+}
+
+bool TutorialGame::Vector3InVector(vector<Vector3> vectorList, Vector3 vectorChecked) {
+	for (Vector3 tempVec : vectorList) {
+		if (tempVec == vectorChecked)
+			return true;
+	}
+	return false;
 }
 
 void TutorialGame::InitDefaultFloor() {
@@ -614,8 +638,7 @@ void TutorialGame::SoftBodyTest() {
 	SoftBodyCubeTest(softBodyTest);
 }
 
-void TutorialGame::SoftBodyCubeTest(SoftBodyObject* softBody)
-{
+void TutorialGame::SoftBodyCubeTest(SoftBodyObject* softBody) {
 	SoftBodyJoint* botBotLeft = AddSoftBodyJoint(Vector3(25, 25, 25), 1);
 	softBody->AddJoint(botBotLeft);
 	SoftBodyJoint* botBotRight = AddSoftBodyJoint(Vector3(75, 25, 25), 1);

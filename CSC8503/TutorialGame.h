@@ -68,6 +68,10 @@ namespace NCL {
 			StateGameObject* AddStateObjectToWorld(const Vector3& position, const std::string& objectName);
 			StateGameObject* testStateObject;
 
+			void CreateSoftBodyJoints(Mesh* mesh, SoftBodyObject* softBody);
+
+			bool Vector3InVector(vector<Vector3> vectorList, Vector3 vectorChecked);
+
 #ifdef USEVULKAN
 			GameTechVulkanRenderer*	renderer;
 #else

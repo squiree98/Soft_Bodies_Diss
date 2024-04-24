@@ -15,6 +15,7 @@ public:
 	void UpdateRelativePos(Vector3 movedDistance);
 
 protected:
+	vector<int> respectiveVertIndices;
 
 	Vector3 basePosition;
 	Vector3 relativePosition;;

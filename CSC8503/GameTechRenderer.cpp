@@ -297,7 +297,7 @@ void GameTechRenderer::RenderCamera() {
 	}
 }
 
-Mesh* GameTechRenderer::LoadMesh(const std::string& name) {
+Mesh* GameTechRenderer::LoadMesh(const std::string& name, bool isSoft) {
 	OGLMesh* mesh = new OGLMesh();
 	MshLoader::LoadMesh(name, *mesh);
 	mesh->SetPrimitiveType(GeometryPrimitive::Triangles);
