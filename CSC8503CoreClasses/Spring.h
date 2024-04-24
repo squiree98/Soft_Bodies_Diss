@@ -7,6 +7,9 @@ public:
 	Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, float restLength);
 	~Spring();
 
+	ParticleObject* GetAnchor() { return mAnchor; }
+	ParticleObject* GetBob() { return mBob; }
+
 	void Update(float dt);
 
 protected:

@@ -37,8 +37,10 @@ void SoftBodyObject::UpdateAveragePosition() {
 }
 
 void SoftBodyObject::UpdateSprings(float dt) const {
+	int counter = 0;
 	for (Spring* x : softBodySprings) {
 		x->Update(dt);
+		counter++;
 	}
 }
 
@@ -46,4 +48,14 @@ void SoftBodyObject::UpdateJoints() {
 	for (SoftBodyJoint* x : softBodyJoints) {
 		x->UpdateRelativePos(averagePosition - basePosition);
 	}
+}
+
+SoftBodyJoint* SoftBodyObject::GetJointWithVertIndex(int index) {
+	for (SoftBodyJoint* joint : softBodyJoints) {
+		for (unsigned int x : joint->GetVertexIndices()) {
+			if (x == index)
+				return joint;
+		}
+	}
+	return nullptr;
 }

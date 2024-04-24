@@ -18,6 +18,9 @@ public:
 	void UpdateSoftBody(float dt);
 	void UpdateJoints();
 
+	vector<SoftBodyJoint*> GetJoints() { return softBodyJoints; }
+	vector<Spring*> GetSprings() { return softBodySprings; }
+	SoftBodyJoint* GetJointWithVertIndex(int index);
 	void AddJoint(SoftBodyJoint* joint) {
 		softBodyJoints.push_back(joint);
 		UpdateAveragePosition();

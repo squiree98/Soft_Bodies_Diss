@@ -85,8 +85,8 @@ TutorialGame::~TutorialGame()	{
 
 void TutorialGame::UpdateGame(float dt) {
 
-	//softBodyTest->UpdateSoftBody(dt);
-	//softBodyTest->UpdateJoints();
+	softBodyTest->UpdateSoftBody(dt);
+	softBodyTest->UpdateJoints();
 
 	if (!inSelectionMode) {
 		world->GetMainCamera().UpdateCamera(dt);
@@ -520,13 +520,42 @@ StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position, co
 void TutorialGame::CreateSoftBodyJoints(Mesh* mesh, SoftBodyObject* softBody) {
 	vector<Vector3> previousPositions;
 
+	// ToDo: Move this inside the soft body object class when done
+	int counter = 0;
+	// create joints using vertices
 	for (Vector3 vertPos : mesh->GetPositionData()) {
 		if (!Vector3InVector(previousPositions, vertPos)) {
 			// doesn't exist in soft body
 			previousPositions.push_back(vertPos);
 			SoftBodyJoint* joint = AddSoftBodyJoint(vertPos, 0.1f, false);
+			joint->AddVertIndex(counter);
 			softBody->AddJoint(joint);
 		}
+		else {
+			for (size_t x = 0; x < softBody->GetJoints().size(); x++) {
+				if (softBody->GetJoints()[x]->GetTransform().GetPosition() == vertPos)
+					softBody->GetJoints()[x]->AddVertIndex(counter);
+			}
+		}
+		counter++;
+	}
+
+	counter = 0;
+	// created springs using indices
+	for (unsigned int indicesIndex : mesh->GetIndexData()) {
+		if (counter != mesh->GetIndexData().size() - 1) {
+			SoftBodyJoint* tempJoint1 = softBody->GetJointWithVertIndex(indicesIndex);
+			SoftBodyJoint* tempJoint2 = softBody->GetJointWithVertIndex(indicesIndex + 1);
+			Spring* tempSpring = new Spring(tempJoint1, tempJoint2, 1, 1);
+			bool addSpring = true;
+			for (Spring* spring : softBody->GetSprings()) {
+				if ((tempSpring->GetAnchor() == spring->GetBob() && tempSpring->GetBob() == spring->GetAnchor()) || (tempSpring->GetAnchor() == spring->GetAnchor() && tempSpring->GetBob() == spring->GetBob()))
+					addSpring = false;
+			}
+			if (addSpring)
+				softBody->AddSpring(tempSpring);
+		}
+		counter++;
 	}
 }
 

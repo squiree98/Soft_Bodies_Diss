@@ -14,8 +14,12 @@ public:
 
 	void UpdateRelativePos(Vector3 movedDistance);
 
+	void AddVertIndex(int index) { vertexIndices.push_back(index); }
+	vector<int> GetVertexIndices() { return vertexIndices; }
+
 protected:
-	vector<int> respectiveVertIndices;
+	
+	vector<int> vertexIndices;
 
 	Vector3 basePosition;
 	Vector3 relativePosition;;
