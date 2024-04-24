@@ -46,9 +46,14 @@ void SoftBodyObject::UpdateSprings(float dt) const {
 }
 
 void SoftBodyObject::CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world) {
+	CreateBodyVertices(mesh, world);
+
+	CreateBodySprings(mesh);
+}
+
+void SoftBodyObject::CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world) {
 	vector<Vector3> previousPositions;
 
-	// ToDo: Move this inside the soft body object class when done
 	int counter = 0;
 	// create joints using vertices
 	for (Vector3 vertPos : mesh->GetPositionData()) {
@@ -67,21 +72,24 @@ void SoftBodyObject::CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world) 
 		}
 		counter++;
 	}
+}
 
-	counter = 0;
+void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh) {
+	int counter = 0;
 	// created springs using indices
-	for (unsigned int indicesIndex : mesh->GetIndexData()) {
+	for (signed int indicesIndex : mesh->GetIndexData()) {
 		if (counter != mesh->GetIndexData().size() - 1) {
 			SoftBodyJoint* tempJoint1 = GetJointWithVertIndex(indicesIndex);
 			SoftBodyJoint* tempJoint2 = GetJointWithVertIndex(indicesIndex + 1);
-			Spring* tempSpring = new Spring(tempJoint1, tempJoint2, 1, 1);
 			bool addSpring = true;
 			for (Spring* spring : softBodySprings) {
-				if ((tempSpring->GetAnchor() == spring->GetBob() && tempSpring->GetBob() == spring->GetAnchor()) || (tempSpring->GetAnchor() == spring->GetAnchor() && tempSpring->GetBob() == spring->GetBob()))
+				if ((tempJoint1 == spring->GetBob() && tempJoint2 == spring->GetAnchor()) || (tempJoint1 == spring->GetAnchor() && tempJoint2 == spring->GetBob()))
 					addSpring = false;
 			}
-			if (addSpring)
+			if (addSpring) {
+				Spring* tempSpring = new Spring(tempJoint1, tempJoint2, 1, 1);
 				AddSpring(tempSpring);
+			}
 		}
 		counter++;
 	}

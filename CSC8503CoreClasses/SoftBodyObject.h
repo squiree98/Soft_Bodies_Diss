@@ -31,6 +31,9 @@ public:
 	void AddSpring(Spring* spring) { softBodySprings.push_back(spring); }
 
 	void CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world);
+	void CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world);
+	void CreateBodySprings(NCL::Mesh* mesh);
+
 protected:
 
 	void UpdateAveragePosition();
