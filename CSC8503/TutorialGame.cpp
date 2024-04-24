@@ -280,7 +280,7 @@ void TutorialGame::InitWorld() {
 	// SoftBodyTest();
 
 	softBodyTest = new SoftBodyObject();
-	softBodyTest->CreateJoints(cubeMesh, world);
+	softBodyTest->CreateJoints(softBodyMesh, world);
 
 	//InitGameExamples();
 	InitDefaultFloor();
@@ -518,7 +518,7 @@ StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position, co
 }
 
 void TutorialGame::InitDefaultFloor() {
-	AddFloorToWorld(Vector3(0, -20, 0), "Floor Object");
+	AddFloorToWorld(Vector3(0, -100, 0), "Floor Object");
 }
 
 void TutorialGame::InitGameExamples() {
