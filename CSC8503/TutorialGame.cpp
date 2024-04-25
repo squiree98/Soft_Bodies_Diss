@@ -56,7 +56,7 @@ void TutorialGame::InitialiseAssets() {
 	bonusMesh	= renderer->LoadMesh("apple.msh");
 	capsuleMesh = renderer->LoadMesh("capsule.msh");
 
-	softBodyMesh = renderer->LoadMesh("Role_T.msh");
+	softBodyMesh = renderer->LoadMesh("cube.msh");
 	softBofyMaterial = renderer->LoadMaterial("Role_T.mat");
 	tempAnim = renderer->LoadAnimation("Role_T.anm");
 
@@ -86,7 +86,7 @@ TutorialGame::~TutorialGame()	{
 void TutorialGame::UpdateGame(float dt) {
 
 	softBodyTest->UpdateSoftBody(dt);
-	softBodyTest->UpdateJoints();
+	softBodyTest->GetRenderObject()->GetMesh()->UploadToGPU();
 
 	if (!inSelectionMode) {
 		world->GetMainCamera().UpdateCamera(dt);
@@ -279,8 +279,7 @@ void TutorialGame::InitWorld() {
 
 	// SoftBodyTest();
 
-	softBodyTest = new SoftBodyObject();
-	softBodyTest->CreateJoints(cubeMesh, world);
+	softBodyTest = new SoftBodyObject(softBodyMesh, world, basicTex, basicShader);
 
 	//InitGameExamples();
 	InitDefaultFloor();
@@ -522,7 +521,7 @@ void TutorialGame::InitDefaultFloor() {
 }
 
 void TutorialGame::InitGameExamples() {
-	temp = AddPlayerToWorld(Vector3(0, 5, 0), "Player Object");
+	AddPlayerToWorld(Vector3(0, 5, 0), "Player Object");
 	AddEnemyToWorld(Vector3(5, 5, 0), "Enemy Object");
 	AddBonusToWorld(Vector3(10, 5, 0), "Bonus Object");
 }

@@ -1,11 +1,21 @@
 #include "SoftBodyObject.h"
 #include "GeneralUse.h"
+#include "RenderObject.h"
 
 #include "Debug.h"
 
 SoftBodyObject::SoftBodyObject()
 {
 	averagePosition = Vector3(0,0,0);
+}
+
+SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader)
+{
+	averagePosition = Vector3(0, 0, 0);
+	CreateJoints(mesh, world);
+	SetRenderObject(new RenderObject(&GetTransform(), mesh, texture, shader));
+
+	world->AddGameObject(this);
 }
 
 SoftBodyObject::~SoftBodyObject()
@@ -23,6 +33,8 @@ void SoftBodyObject::UpdateSoftBody(float dt) {
 	UpdateAveragePosition();
 
 	UpdateSprings(dt);
+
+	ConvertParticlesToVertices();
 }
 
 void SoftBodyObject::UpdateAveragePosition() {
@@ -45,6 +57,18 @@ void SoftBodyObject::UpdateSprings(float dt) const {
 	}
 }
 
+void SoftBodyObject::ConvertParticlesToVertices() {
+	vector<Vector3> tempVertices(softBodyJoints.size() * 3);
+
+	for (SoftBodyJoint* joint : softBodyJoints) {
+		for (int x : joint->GetVertexIndices()) {
+			tempVertices[x] = joint->GetTransform().GetPosition();
+		}
+	}
+
+	renderObject->GetMesh()->SetVertexPositions(tempVertices);
+}
+
 void SoftBodyObject::CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world) {
 	CreateBodyVertices(mesh, world);
 
@@ -57,11 +81,11 @@ void SoftBodyObject::CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world) {
 	int counter = 0;
 	// create joints using vertices
 	for (Vector3 vertPos : mesh->GetPositionData()) {
-		//vertPos *= 50;
+		vertPos *= 10;
 		if (!CheckVectorHasValue(previousPositions, vertPos)) {
 			// doesn't exist in soft body
 			previousPositions.push_back(vertPos);
-			SoftBodyJoint* joint = new SoftBodyJoint(vertPos, 1.f, world);
+			SoftBodyJoint* joint = new SoftBodyJoint(vertPos, .4f, world);
 			joint->AddVertIndex(counter);
 			AddJoint(joint);
 		}
@@ -79,25 +103,21 @@ void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh) {
 	int counter = 0;
 	// created springs using indices
 	for (signed int indicesIndex : mesh->GetIndexData()) {
-		std::cout << counter << std::endl;
-		SoftBodyJoint* tempJoint1 = GetJointWithVertIndex(mesh->GetIndexData()[indicesIndex]);
-		SoftBodyJoint* tempJoint2 = GetJointWithVertIndex(mesh->GetIndexData()[indicesIndex + 1]);
-		bool addSpring = true;
-		for (Spring* spring : softBodySprings) {
-			if ((tempJoint1 == spring->GetBob() && tempJoint2 == spring->GetAnchor()) || (tempJoint1 == spring->GetAnchor() && tempJoint2 == spring->GetBob()))
-				addSpring = false;
+		if (counter != mesh->GetIndexData().size() - 1)
+		{
+			SoftBodyJoint* tempJoint1 = GetJointWithVertIndex(mesh->GetIndexData()[counter]);
+			SoftBodyJoint* tempJoint2 = GetJointWithVertIndex(mesh->GetIndexData()[counter + 1]);
+			bool addSpring = true;
+			for (Spring* spring : softBodySprings) {
+				if ((tempJoint1 == spring->GetBob() && tempJoint2 == spring->GetAnchor()) || (tempJoint1 == spring->GetAnchor() && tempJoint2 == spring->GetBob()))
+					addSpring = false;
+			}
+			if (addSpring) {
+				Spring* tempSpring = new Spring(tempJoint1, tempJoint2, 0.1f, (tempJoint1->GetTransform().GetPosition() - tempJoint2->GetTransform().GetPosition()).Length());
+				AddSpring(tempSpring);
+			}
+			counter++;
 		}
-		if (addSpring) {
-			Spring* tempSpring = new Spring(tempJoint1, tempJoint2, 0.01f, (tempJoint1->GetTransform().GetPosition() - tempJoint2->GetTransform().GetPosition()).Length());
-			AddSpring(tempSpring);
-		}
-		counter++;
-	}
-}
-
-void SoftBodyObject::UpdateJoints() {
-	for (SoftBodyJoint* x : softBodyJoints) {
-		x->UpdateRelativePos(averagePosition - basePosition);
 	}
 }
 
