@@ -86,7 +86,7 @@ TutorialGame::~TutorialGame()	{
 void TutorialGame::UpdateGame(float dt) {
 
 	softBodyTest->UpdateSoftBody(dt);
-	softBodyTest->GetRenderObject()->GetMesh()->UploadToGPU();
+	softBodyTest->GetRenderObject()->GetMesh()->UploadToGPU(renderer);
 
 	if (!inSelectionMode) {
 		world->GetMainCamera().UpdateCamera(dt);

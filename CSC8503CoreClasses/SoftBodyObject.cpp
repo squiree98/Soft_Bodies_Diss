@@ -83,11 +83,11 @@ void SoftBodyObject::CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world) {
 	int counter = 0;
 	// create joints using vertices
 	for (Vector3 vertPos : mesh->GetPositionData()) {
-		vertPos *= 10;
+		vertPos *= 25;
 		if (!CheckVectorHasValue(previousPositions, vertPos)) {
 			// doesn't exist in soft body
 			previousPositions.push_back(vertPos);
-			SoftBodyJoint* joint = new SoftBodyJoint(vertPos, .4f, world);
+			SoftBodyJoint* joint = new SoftBodyJoint(vertPos, 2.f, world);
 			joint->AddVertIndex(counter);
 			AddJoint(joint);
 		}
