@@ -88,6 +88,7 @@ namespace NCL {
 			Mesh*	capsuleMesh = nullptr;
 			Mesh*	cubeMesh	= nullptr;
 			Mesh*	sphereMesh	= nullptr;
+			Mesh*	cylinderMesh = nullptr;
 
 			Texture*	basicTex	= nullptr;
 			Shader*		basicShader = nullptr;

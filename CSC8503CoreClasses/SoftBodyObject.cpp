@@ -15,6 +15,8 @@ SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* 
 	CreateJoints(mesh, world);
 	SetRenderObject(new RenderObject(&GetTransform(), mesh, texture, shader));
 
+	numberOfVertices = mesh->GetPositionData().size();
+
 	world->AddGameObject(this);
 }
 
@@ -58,7 +60,7 @@ void SoftBodyObject::UpdateSprings(float dt) const {
 }
 
 void SoftBodyObject::ConvertParticlesToVertices() {
-	vector<Vector3> tempVertices(softBodyJoints.size() * 3);
+	vector<Vector3> tempVertices(numberOfVertices);
 
 	for (SoftBodyJoint* joint : softBodyJoints) {
 		for (int x : joint->GetVertexIndices()) {

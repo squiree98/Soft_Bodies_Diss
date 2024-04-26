@@ -24,7 +24,7 @@ TutorialGame::TutorialGame() : controller(*Window::GetWindow()->GetKeyboard(), *
 	physics		= new PhysicsSystem(*world);
 
 	forceMagnitude	= 10.0f;
-	useGravity		= true;
+	useGravity		= false;
 	physics->UseGravity(useGravity);
 	inSelectionMode = false;
 
@@ -54,9 +54,9 @@ void TutorialGame::InitialiseAssets() {
 	charMesh	= renderer->LoadMesh("goat.msh");
 	enemyMesh	= renderer->LoadMesh("Keeper.msh");
 	bonusMesh	= renderer->LoadMesh("apple.msh");
-	capsuleMesh = renderer->LoadMesh("capsule.msh");
+	cylinderMesh = renderer->LoadMesh("Cylinder.msh");
 
-	softBodyMesh = renderer->LoadMesh("cube.msh");
+	softBodyMesh = renderer->LoadMesh("Sphere.msh");
 	softBofyMaterial = renderer->LoadMaterial("Role_T.mat");
 	tempAnim = renderer->LoadAnimation("Role_T.anm");
 

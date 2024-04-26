@@ -55,4 +55,6 @@ protected:
 	vector<SoftBodyJoint*> softBodyJoints;
 	// used to update springs to move joints
 	vector<Spring*> softBodySprings;
+
+	int numberOfVertices;
 };
