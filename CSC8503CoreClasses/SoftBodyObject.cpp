@@ -9,10 +9,10 @@ SoftBodyObject::SoftBodyObject()
 	averagePosition = Vector3(0,0,0);
 }
 
-SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader)
+SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position, Vector3 scale, float particleSize)
 {
-	averagePosition = Vector3(0, 0, 0);
-	CreateJoints(mesh, world);
+	GetTransform().SetPosition(position);
+	CreateJoints(mesh, world, scale, particleSize);
 	SetRenderObject(new RenderObject(&GetTransform(), mesh, texture, shader));
 
 	numberOfVertices = mesh->GetPositionData().size();
@@ -71,23 +71,23 @@ void SoftBodyObject::ConvertParticlesToVertices() {
 	renderObject->GetMesh()->SetVertexPositions(tempVertices);
 }
 
-void SoftBodyObject::CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world) {
-	CreateBodyVertices(mesh, world);
+void SoftBodyObject::CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world , Vector3 scale, float particleSize) {
+	CreateBodyVertices(mesh, world, scale, particleSize);
 
 	CreateBodySprings(mesh);
 }
 
-void SoftBodyObject::CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world) {
+void SoftBodyObject::CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world, Vector3 scale, float particleSize) {
 	vector<Vector3> previousPositions;
 
 	int counter = 0;
 	// create joints using vertices
 	for (Vector3 vertPos : mesh->GetPositionData()) {
-		vertPos *= 25;
+		vertPos *= scale;
 		if (!CheckVectorHasValue(previousPositions, vertPos)) {
 			// doesn't exist in soft body
 			previousPositions.push_back(vertPos);
-			SoftBodyJoint* joint = new SoftBodyJoint(vertPos, 2.f, world);
+			SoftBodyJoint* joint = new SoftBodyJoint(vertPos, particleSize, world);
 			joint->AddVertIndex(counter);
 			AddJoint(joint);
 		}
