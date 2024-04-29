@@ -25,7 +25,7 @@ namespace NCL {
 		template<class T>
 		class QuadTreeNode	{
 		public:
-			typedef std::function<void(std::list<QuadTreeEntry<T>>&)> QuadTreeFunc;
+			typedef std::function<void(std::vector<QuadTreeEntry<T>>&)> QuadTreeFunc;
 		protected:
 			friend class QuadTree<T>;
 
@@ -99,7 +99,7 @@ namespace NCL {
 			}
 
 		protected:
-			std::list< QuadTreeEntry<T> >	contents;
+			std::vector< QuadTreeEntry<T> >	contents;
 
 			Vector2 position;
 			Vector2 size;

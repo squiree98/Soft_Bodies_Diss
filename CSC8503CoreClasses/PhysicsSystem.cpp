@@ -294,7 +294,7 @@ void PhysicsSystem::BroadPhase() {
 	}
 
 	// find what objects may be colliding
-	tree.OperateOnContents([&](std::list<QuadTreeEntry<GameObject*>>& data) {
+	tree.OperateOnContents([&](std::vector<QuadTreeEntry<GameObject*>>& data) {
 		CollisionDetection::CollisionInfo info;
 		for (auto i = data.begin(); i != data.end(); i++) {
 			for (auto j = std::next(i); j != data.end(); j++) {
