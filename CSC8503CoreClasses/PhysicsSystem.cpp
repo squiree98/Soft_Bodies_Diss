@@ -14,7 +14,7 @@ using namespace CSC8503;
 
 PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	applyGravity	= false;
-	useBroadPhase	= false;	
+	useBroadPhase	= true;
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
 	SetGravity(Vector3(0.0f, -9.8f, 0.0f));
@@ -294,7 +294,7 @@ void PhysicsSystem::BroadPhase() {
 	}
 
 	// find what objects may be colliding
-	tree.OperateOnContents([&](std::list<QuadTreeEntry<GameObject*>>& data) {
+	tree.OperateOnContents([&](std::vector<QuadTreeEntry<GameObject*>>& data) {
 		CollisionDetection::CollisionInfo info;
 		for (auto i = data.begin(); i != data.end(); i++) {
 			for (auto j = std::next(i); j != data.end(); j++) {

@@ -25,7 +25,7 @@ namespace NCL {
 		template<class T>
 		class QuadTreeNode	{
 		public:
-			typedef std::function<void(std::list<QuadTreeEntry<T>>&)> QuadTreeFunc;
+			typedef std::function<void(std::vector<QuadTreeEntry<T>>&)> QuadTreeFunc;
 		protected:
 			friend class QuadTree<T>;
 
@@ -44,7 +44,7 @@ namespace NCL {
 			void Insert(T& object, const Vector3& objectPos, const Vector3& objectSize, int depthLeft, int maxSize) {
 				// check if objects AABB overlaps own AABB
 				if (!CollisionDetection::AABBTest(objectPos, Vector3(position.x, 0, position.y), objectSize, Vector3(size.x, 1000.0f, size.y)))
-					// no overlap therfore not in node or any children nodes
+					// no overlap therefore not in node or any children nodes
 					return;
 				// if node has children descend tree until eaf node found
 				if (children) {
@@ -54,6 +54,7 @@ namespace NCL {
 				}
 				// if leaf node then insert node into child depending on location
 				else {
+					contents.push_back(QuadTreeEntry <T >(object, objectPos, objectSize));
 					if ((int)contents.size() > maxSize && depthLeft > 0) {
 						// create children if there aren't any
 						if (!children) {
@@ -75,10 +76,10 @@ namespace NCL {
 			void Split() {
 				Vector2 halfSize = size / 2.0f;
 				children = new QuadTreeNode<T>[4];
-				children[0] = QuadTreeNode<T>(position + Vector2(-halfSize.x,  halfSize.y), halfSize);
-				children[1] = QuadTreeNode<T>(position + Vector2( halfSize.x,  halfSize.y), halfSize);
-				children[2] = QuadTreeNode<T>(position + Vector2(-halfSize.x, -halfSize.y), halfSize);
-				children[3] = QuadTreeNode<T>(position + Vector2( halfSize.x,  halfSize.y), halfSize);
+				children[0] = QuadTreeNode<T>(position + Vector2(halfSize.x,  halfSize.y), halfSize);
+				children[1] = QuadTreeNode<T>(position + Vector2(-halfSize.x, halfSize.y), halfSize);
+				children[2] = QuadTreeNode<T>(position + Vector2(halfSize.x, -halfSize.y), halfSize);
+				children[3] = QuadTreeNode<T>(position + Vector2(-halfSize.x, -halfSize.y), halfSize);
 			}
 
 			void DebugDraw() {
@@ -98,7 +99,7 @@ namespace NCL {
 			}
 
 		protected:
-			std::list< QuadTreeEntry<T> >	contents;
+			std::vector< QuadTreeEntry<T> >	contents;
 
 			Vector2 position;
 			Vector2 size;
