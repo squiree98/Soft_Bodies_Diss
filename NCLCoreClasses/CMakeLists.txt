@@ -49,6 +49,7 @@ set(Maths
     "Vector3i.h"
     "Vector4i.cpp"
     "Vector4i.h"
+    "GeneralUse.h"
 )
 source_group("Maths" FILES ${Maths})
 

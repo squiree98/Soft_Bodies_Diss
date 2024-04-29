@@ -3,8 +3,11 @@
 #include "OGLShader.h"
 #include "OGLTexture.h"
 #include "OGLMesh.h"
+#include "MeshMaterial.h"
+#include "MeshAnimation.h"
 
 #include "GameWorld.h"
+#include "SoftBodyObject.h"
 
 namespace NCL {
 	class Maths::Vector3;
@@ -17,9 +20,11 @@ namespace NCL {
 			GameTechRenderer(GameWorld& world);
 			~GameTechRenderer();
 
-			Mesh*		LoadMesh(const std::string& name);
-			Texture*	LoadTexture(const std::string& name);
-			Shader*		LoadShader(const std::string& vertex, const std::string& fragment);
+			Mesh*			LoadMesh(const std::string& name, bool isSoft = false);
+			Texture*		LoadTexture(const std::string& name);
+			Shader*			LoadShader(const std::string& vertex, const std::string& fragment);
+			MeshMaterial*	LoadMaterial(const std::string& name);
+			MeshAnimation*	LoadAnimation(const std::string& name);
 
 		protected:
 			void NewRenderLines();

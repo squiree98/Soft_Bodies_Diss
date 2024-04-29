@@ -116,7 +116,7 @@ void GameTechRenderer::RenderFrame() {
 	glClearColor(1, 1, 1, 1);
 	BuildObjectList();
 	SortObjectList();
-	RenderShadowMap();
+	//RenderShadowMap();
 	RenderSkybox();
 	RenderCamera();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
@@ -297,7 +297,7 @@ void GameTechRenderer::RenderCamera() {
 	}
 }
 
-Mesh* GameTechRenderer::LoadMesh(const std::string& name) {
+Mesh* GameTechRenderer::LoadMesh(const std::string& name, bool isSoft) {
 	OGLMesh* mesh = new OGLMesh();
 	MshLoader::LoadMesh(name, *mesh);
 	mesh->SetPrimitiveType(GeometryPrimitive::Triangles);
@@ -397,6 +397,14 @@ Texture* GameTechRenderer::LoadTexture(const std::string& name) {
 
 Shader* GameTechRenderer::LoadShader(const std::string& vertex, const std::string& fragment) {
 	return new OGLShader(vertex, fragment);
+}
+
+MeshMaterial* GameTechRenderer::LoadMaterial(const std::string& name) {
+	return new MeshMaterial(name);
+}
+
+MeshAnimation* GameTechRenderer::LoadAnimation(const std::string& name) {
+	return new MeshAnimation(name);
 }
 
 void GameTechRenderer::SetDebugStringBufferSizes(size_t newVertCount) {

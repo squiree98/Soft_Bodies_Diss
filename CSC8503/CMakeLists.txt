@@ -23,15 +23,17 @@ list(APPEND Source_Files "GameTechVulkanRenderer.cpp")
 
 
 
-file(GLOB SHADER_FILES ${ASSET_ROOT}/Shaders/VK/*.*)
+file(GLOB SHADER_FILES ${ASSET_ROOT}/Shaders/*.*)
 
 endif()
+
 
 source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES
     ${Header_Files}
     ${Source_Files}
+    ${SHADER_FILES}
 )
 
 if(USE_VULKAN)
