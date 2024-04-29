@@ -86,7 +86,11 @@ TutorialGame::~TutorialGame()	{
 void TutorialGame::UpdateGame(float dt) {
 
 	softBodyTest->UpdateSoftBody(dt);
-	softBodyTest->GetRenderObject()->GetMesh()->UploadToGPU(renderer);
+	if (OGLMesh* tempMesh = dynamic_cast<OGLMesh*>(softBodyTest->GetRenderObject()->GetMesh())) {
+		unsigned int start = 0;
+		unsigned int count = tempMesh->GetPositionData().size();
+		tempMesh->UpdateGPUBuffers(start, count);
+	}
 
 	if (!inSelectionMode) {
 		world->GetMainCamera().UpdateCamera(dt);
@@ -131,7 +135,7 @@ void TutorialGame::UpdateGame(float dt) {
 			if (objClosest) {
 				objClosest->GetRenderObject()->SetColour(Vector4(1, 1, 1, 1));
 			}
-			objClosest = (GameObject*)closestCollision.node;
+			objClosest = static_cast<GameObject*>(closestCollision.node);
 
 			objClosest->GetRenderObject()->SetColour(Vector4(1, 0, 1, 1));
 		}
