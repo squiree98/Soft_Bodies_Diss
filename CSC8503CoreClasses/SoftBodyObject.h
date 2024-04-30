@@ -28,27 +28,22 @@ public:
 
 	void AddJoint(SoftBodyJoint* joint) {
 		softBodyJoints.push_back(joint);
-		UpdateAveragePosition();
-		basePosition = averagePosition;
 	}
 
 	void AddSpring(Spring* spring) { softBodySprings.push_back(spring); }
 
-	void CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world, Vector3 scale, float particleSize);
+	void CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world, Vector3 position, Vector3 scale, float particleSize);
 
-	void CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world, Vector3 scale, float particleSize);
+	void CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world, Vector3 position, Vector3 scale, float particleSize);
 
 	void CreateBodySprings(NCL::Mesh* mesh);
 
 protected:
 
-	void UpdateAveragePosition();
-
 	void UpdateSprings(float dt) const;
 
 	void ConvertParticlesToVertices();
 
-	Vector3 averagePosition;
 	Vector3 basePosition;
 
 	// used to ensure mesh vertices are matching joint position

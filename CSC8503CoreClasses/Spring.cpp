@@ -22,7 +22,7 @@ Spring::~Spring()
 
 void Spring::Update(float dt)
 {
-	// NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), NCL::Debug::MAGENTA);
+	//NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), NCL::Debug::MAGENTA);
 
 	mCurrentLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
 	float displacement = mCurrentLength.Length() - (mRestLength / 2);
