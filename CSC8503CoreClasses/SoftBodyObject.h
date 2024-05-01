@@ -32,17 +32,28 @@ public:
 
 	void AddSpring(Spring* spring) { softBodySprings.push_back(spring); }
 
-	void CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world, Vector3 position, Vector3 scale, float particleSize, float springStrength);
-
-	void CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world, Vector3 position, Vector3 scale, float particleSize);
-
-	void CreateBodySprings(NCL::Mesh* mesh, float springStrength);
 
 protected:
 
 	void UpdateSprings(float dt) const;
 
 	void ConvertParticlesToVertices();
+
+	void CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world, Vector3 position, Vector3 scale, float particleSize, float springStrength);
+
+	void CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world, Vector3 position, Vector3 scale, float particleSize);
+
+	void CreateBodySprings(NCL::Mesh* mesh, float springStrength);
+
+	void GiveShapeVolume();
+
+	void CreateXYZSprings();
+
+	SoftBodyJoint* GetSmallestAndLargestValue(char axis, SoftBodyJoint* smallAndLarge[2]);
+
+	void CreateShapeCornerSprings();
+
+	SoftBodyJoint* GetShapeCorners(bool lowX, bool lowY, bool lowZ);
 
 	Vector3 basePosition;
 

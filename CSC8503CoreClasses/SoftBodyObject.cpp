@@ -15,6 +15,8 @@ SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* 
 	numberOfVertices = mesh->GetPositionData().size();
 
 	world->AddGameObject(this);
+
+	GiveShapeVolume();
 }
 
 SoftBodyObject::~SoftBodyObject()
@@ -29,17 +31,6 @@ SoftBodyObject::~SoftBodyObject()
 }
 
 void SoftBodyObject::UpdateSoftBody(float dt) {
-	int counter = 0;
-	Vector3 averagePosition = Vector3(0, 0, 0);
-	Vector3 base = Vector3(0, 0, 0);
-	for (SoftBodyJoint* joint : softBodyJoints)
-	{
-		base += joint->GetTransform().GetPosition();
-		counter++;
-	}
-	averagePosition = base / counter;
-	std::cout << averagePosition << std::endl;
-
 	UpdateSprings(dt);
 
 	ConvertParticlesToVertices();
@@ -117,6 +108,131 @@ void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh, float springStrength) {
 			counter++;
 		}
 	}
+}
+
+void SoftBodyObject::GiveShapeVolume() {
+	CreateShapeCornerSprings();
+
+	CreateXYZSprings();
+}
+
+void SoftBodyObject::CreateXYZSprings() {
+	SoftBodyJoint* array[2];
+
+	GetSmallestAndLargestValue('y', array);
+	Spring* ySpring = new Spring(array[0], array[1], .1f, (array[0]->GetTransform().GetPosition() - array[1]->GetTransform().GetPosition()).Length());
+	AddSpring(ySpring);
+	NCL::Debug::DrawLine(array[0]->GetTransform().GetPosition(), array[1]->GetTransform().GetPosition(), NCL::Debug::MAGENTA, 30.0F);
+
+	GetSmallestAndLargestValue('x', array);
+	Spring* xSpring = new Spring(array[0], array[1], .1f, (array[0]->GetTransform().GetPosition() - array[1]->GetTransform().GetPosition()).Length());
+	AddSpring(xSpring);
+	NCL::Debug::DrawLine(array[0]->GetTransform().GetPosition(), array[1]->GetTransform().GetPosition(), NCL::Debug::MAGENTA, 30.0F);
+
+	GetSmallestAndLargestValue('z', array);
+	Spring* zSpring = new Spring(array[0], array[1], .1f, (array[0]->GetTransform().GetPosition() - array[1]->GetTransform().GetPosition()).Length());
+	AddSpring(zSpring);
+	NCL::Debug::DrawLine(array[0]->GetTransform().GetPosition(), array[1]->GetTransform().GetPosition(), NCL::Debug::MAGENTA, 30.0F);
+}
+
+SoftBodyJoint* SoftBodyObject::GetSmallestAndLargestValue(const char axis, SoftBodyJoint* smallAndLarge[2]) {
+	SoftBodyJoint* tempSmallest = softBodyJoints[0];
+	SoftBodyJoint* tempLargest = softBodyJoints[1];
+
+	for (SoftBodyJoint* joint : softBodyJoints) {
+		switch (axis)
+		{
+		case('x'):
+			if (joint->GetTransform().GetPosition().x > tempLargest->GetTransform().GetPosition().x)
+				tempLargest = joint;
+			if (joint->GetTransform().GetPosition().x < tempSmallest->GetTransform().GetPosition().x)
+				tempSmallest = joint;
+			break;
+		case('y'):
+			if (joint->GetTransform().GetPosition().y > tempLargest->GetTransform().GetPosition().y)
+				tempLargest = joint;
+			if (joint->GetTransform().GetPosition().y < tempSmallest->GetTransform().GetPosition().y)
+				tempSmallest = joint;
+			break;
+		case('z'):
+			if (joint->GetTransform().GetPosition().z > tempLargest->GetTransform().GetPosition().z)
+				tempLargest = joint;
+			if (joint->GetTransform().GetPosition().z < tempSmallest->GetTransform().GetPosition().z)
+				tempSmallest = joint;
+			break;
+		}
+	}
+	smallAndLarge[0] = tempSmallest;
+	smallAndLarge[1] = tempLargest;
+	return smallAndLarge[0];
+}
+
+void SoftBodyObject::CreateShapeCornerSprings() {
+	SoftBodyJoint* botBotLeft = GetShapeCorners(true, true, true);
+
+	SoftBodyJoint* botTopRight = GetShapeCorners(false, true, false);
+
+	SoftBodyJoint* botTopLeft = GetShapeCorners(true, true, false);
+
+	SoftBodyJoint* botBotRight = GetShapeCorners(false, true, true);
+
+	SoftBodyJoint* topBotLeft = GetShapeCorners(true, false, true);
+
+	SoftBodyJoint* topTopRight = GetShapeCorners(false, false, false);
+
+	SoftBodyJoint* topTopLeft = GetShapeCorners(true, false, false);
+
+	SoftBodyJoint* topBotRight = GetShapeCorners(false, false, true);
+
+	Spring* supportSpring1 = new Spring(botBotLeft, topTopRight, 0.000001f, (botBotLeft->GetTransform().GetPosition() - topTopRight->GetTransform().GetPosition()).Length());
+	AddSpring(supportSpring1);
+
+	Spring* supportSpring2 = new Spring(topBotLeft, botTopRight, 0.000001f, (topBotLeft->GetTransform().GetPosition() - botTopRight->GetTransform().GetPosition()).Length());
+	AddSpring(supportSpring2);
+
+	Spring* supportSpring3 = new Spring(botTopLeft, topBotRight, 0.000001f, (botBotLeft->GetTransform().GetPosition() - topTopRight->GetTransform().GetPosition()).Length());
+	AddSpring(supportSpring3);
+
+	Spring* supportSpring4 = new Spring(botBotRight, topTopLeft, 0.000001f, (topBotLeft->GetTransform().GetPosition() - botTopRight->GetTransform().GetPosition()).Length());
+	AddSpring(supportSpring4);
+}
+
+SoftBodyJoint* SoftBodyObject::GetShapeCorners(bool lowX, bool lowY, bool lowZ) {
+	SoftBodyJoint* temp = softBodyJoints[0];
+	float currentLowestPos = FLT_MAX;
+	for (SoftBodyJoint* x : softBodyJoints) {
+		Vector3 jointPos = x->GetTransform().GetPosition();
+		float total = 0;
+		switch (lowX) {
+		case(true):
+			total += jointPos.x;
+			break;
+		case(false):
+			total -= jointPos.x;
+			break;
+		}
+		switch (lowY) {
+		case(true):
+			total += jointPos.y;
+			break;
+		case(false):
+			total -= jointPos.y;
+			break;
+		}
+		switch (lowZ) {
+		case(true):
+			total += jointPos.z;
+			break;
+		case(false):
+			total -= jointPos.z;
+			break;
+		}
+		if (total < currentLowestPos) {
+			temp = x;
+			currentLowestPos = total;
+		}
+	}
+	return temp;
 }
 
 SoftBodyJoint* SoftBodyObject::GetJointWithVertIndex(int index) {
