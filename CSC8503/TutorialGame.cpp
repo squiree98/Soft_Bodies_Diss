@@ -283,7 +283,7 @@ void TutorialGame::InitWorld() {
 
 	// SoftBodyTest();
 
-	softBodyTest = new SoftBodyObject(softBodyMesh, world, basicTex, basicShader, Vector3(0, 40, 0), Vector3(50, 50, 50), 1.f);
+	softBodyTest = new SoftBodyObject(softBodyMesh, world, basicTex, basicShader, Vector3(0, 40, 0), Vector3(20, 20, 20));
 
 	//InitGameExamples();
 	InitDefaultFloor();

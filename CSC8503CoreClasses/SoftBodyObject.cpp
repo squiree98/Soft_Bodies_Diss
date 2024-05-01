@@ -6,10 +6,10 @@
 
 SoftBodyObject::SoftBodyObject() {}
 
-SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position, Vector3 scale, float particleSize)
+SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position, Vector3 scale, float springStrength, float particleSize)
 {
 	GetTransform().SetPosition(Vector3(0,0,0));
-	CreateJoints(mesh, world, position, scale, particleSize);
+	CreateJoints(mesh, world, position, scale, particleSize, springStrength);
 	SetRenderObject(new RenderObject(&GetTransform(), mesh, texture, shader));
 
 	numberOfVertices = mesh->GetPositionData().size();
@@ -65,10 +65,10 @@ void SoftBodyObject::ConvertParticlesToVertices() {
 	renderObject->GetMesh()->SetVertexPositions(tempVertices);
 }
 
-void SoftBodyObject::CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world , Vector3 position, Vector3 scale, float particleSize) {
+void SoftBodyObject::CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world , Vector3 position, Vector3 scale, float particleSize, float springStrength) {
 	CreateBodyVertices(mesh, world, position, scale, particleSize);
 
-	CreateBodySprings(mesh);
+	CreateBodySprings(mesh, springStrength);
 }
 
 void SoftBodyObject::CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world, Vector3 position, Vector3 scale, float particleSize) {
@@ -97,7 +97,7 @@ void SoftBodyObject::CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world, Vecto
 	}
 }
 
-void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh) {
+void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh, float springStrength) {
 	int counter = 0;
 	// created springs using indices
 	for (signed int indicesIndex : mesh->GetIndexData()) {
@@ -111,7 +111,7 @@ void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh) {
 					addSpring = false;
 			}
 			if (addSpring) {
-				Spring* tempSpring = new Spring(tempJoint1, tempJoint2, 0.1f, (tempJoint1->GetTransform().GetPosition() - tempJoint2->GetTransform().GetPosition()).Length());
+				Spring* tempSpring = new Spring(tempJoint1, tempJoint2, springStrength, (tempJoint1->GetTransform().GetPosition() - tempJoint2->GetTransform().GetPosition()).Length());
 				AddSpring(tempSpring);
 			}
 			counter++;

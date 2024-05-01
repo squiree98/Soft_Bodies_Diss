@@ -12,7 +12,7 @@ class SoftBodyObject : public GameObject
 {
 public:
 	SoftBodyObject();
-	SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1), float particleSize = .5f);
+	SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1), float springStrength = .1f, float particleSize = 1.f);
 	~SoftBodyObject();
 
 	// will update two things
@@ -32,11 +32,11 @@ public:
 
 	void AddSpring(Spring* spring) { softBodySprings.push_back(spring); }
 
-	void CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world, Vector3 position, Vector3 scale, float particleSize);
+	void CreateJoints(NCL::Rendering::Mesh* mesh, GameWorld* world, Vector3 position, Vector3 scale, float particleSize, float springStrength);
 
 	void CreateBodyVertices(NCL::Mesh* mesh, GameWorld* world, Vector3 position, Vector3 scale, float particleSize);
 
-	void CreateBodySprings(NCL::Mesh* mesh);
+	void CreateBodySprings(NCL::Mesh* mesh, float springStrength);
 
 protected:
 
