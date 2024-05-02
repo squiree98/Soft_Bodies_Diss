@@ -22,7 +22,7 @@ SoftBodyJoint::SoftBodyJoint(Vector3 position, float radius, GameWorld* world) {
 
 	SetPhysicsObject(new PhysicsObject(&GetTransform(), GetBoundingVolume(), true));
 
-	GetPhysicsObject()->SetInverseMass(1);
+	GetPhysicsObject()->SetInverseMass(1.f);
 	GetPhysicsObject()->InitSphereInertia(false);
 
 	world->AddGameObject(this);

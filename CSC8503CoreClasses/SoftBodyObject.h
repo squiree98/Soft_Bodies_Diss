@@ -12,7 +12,7 @@ class SoftBodyObject : public GameObject
 {
 public:
 	SoftBodyObject();
-	SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1), float springStrength = .1f, float particleSize = 1.f);
+	SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1), float springStrength = 1, float particleSize = 1);
 	~SoftBodyObject();
 
 	// will update two things
@@ -59,6 +59,8 @@ protected:
 
 	// used to ensure mesh vertices are matching joint position
 	vector<SoftBodyJoint*> softBodyJoints;
+	// highest/lowest joints
+	std::map<std::string, SoftBodyJoint*> lowMaxJoints;
 	// used to update springs to move joints
 	vector<Spring*> softBodySprings;
 

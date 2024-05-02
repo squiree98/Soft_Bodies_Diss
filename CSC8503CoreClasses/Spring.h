@@ -4,7 +4,7 @@
 class Spring
 {
 public:
-	Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, float restLength);
+	Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, float restLength, int ix = 0);
 	~Spring();
 
 	ParticleObject* GetAnchor() { return mAnchor; }
@@ -20,6 +20,8 @@ protected:
 	float mSpringConstant;
 
 	float mRestLength;
+
+	int x;
 
 	// to be calculated per frame to determine offset
 	Vector3 mCurrentLength;
