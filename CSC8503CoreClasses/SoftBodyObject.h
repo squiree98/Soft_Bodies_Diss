@@ -51,7 +51,14 @@ protected:
 
 	SoftBodyJoint* GetSmallestAndLargestValue(char axis, SoftBodyJoint* smallAndLarge[2]);
 
+	void GetShapeCorners();
+
 	void CreateShapeCornerSprings();
+
+	void ConnectShapeCornersToAxisSprings();
+	void ConnectShapeCornersXAxis();
+	void ConnectShapeCornersYAxis();
+	void ConnectShapeCornersZAxis();
 
 	SoftBodyJoint* GetShapeCorners(bool lowX, bool lowY, bool lowZ);
 

@@ -103,7 +103,7 @@ void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh, float springStrength) {
 					addSpring = false;
 			}
 			if (addSpring) {
-				Spring* tempSpring = new Spring(tempJoint1, tempJoint2, springStrength, (tempJoint1->GetTransform().GetPosition() - tempJoint2->GetTransform().GetPosition()).Length());
+				Spring* tempSpring = new Spring(tempJoint1, tempJoint2, springStrength);
 				AddSpring(tempSpring);
 			}
 			counter++;
@@ -114,26 +114,30 @@ void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh, float springStrength) {
 void SoftBodyObject::GiveShapeVolume() {
 	CreateXYZSprings();
 
+	GetShapeCorners();
+
 	CreateShapeCornerSprings();
+
+	ConnectShapeCornersToAxisSprings();
 }
 
 void SoftBodyObject::CreateXYZSprings() {
 	SoftBodyJoint* array[2];
 
 	GetSmallestAndLargestValue('y', array);
-	Spring* ySpring = new Spring(array[0], array[1], 1, (array[0]->GetTransform().GetPosition() - array[1]->GetTransform().GetPosition()).Length(), 1);
+	Spring* ySpring = new Spring(array[0], array[1], 1, true);
 	AddSpring(ySpring);
 	lowMaxJoints["lowY"] = array[0];
 	lowMaxJoints["maxY"] = array[1];
 
 	GetSmallestAndLargestValue('x', array);
-	Spring* xSpring = new Spring(array[0], array[1], 1, (array[0]->GetTransform().GetPosition() - array[1]->GetTransform().GetPosition()).Length(), 1);
+	Spring* xSpring = new Spring(array[0], array[1], 1, true);
 	AddSpring(xSpring);
 	lowMaxJoints["lowX"] = array[0];
 	lowMaxJoints["maxX"] = array[1];
 
 	GetSmallestAndLargestValue('z', array);
-	Spring* zSpring = new Spring(array[0], array[1], 1, (array[0]->GetTransform().GetPosition() - array[1]->GetTransform().GetPosition()).Length(), 1);
+	Spring* zSpring = new Spring(array[0], array[1], 1, true);
 	AddSpring(zSpring);
 	lowMaxJoints["lowZ"] = array[0];
 	lowMaxJoints["maxZ"] = array[1];
@@ -171,7 +175,7 @@ SoftBodyJoint* SoftBodyObject::GetSmallestAndLargestValue(const char axis, SoftB
 	return smallAndLarge[0];
 }
 
-void SoftBodyObject::CreateShapeCornerSprings() {
+void SoftBodyObject::GetShapeCorners() {
 	SoftBodyJoint* botBotLeft = GetShapeCorners(true, true, true);
 	lowMaxJoints["botBotLeft"] = botBotLeft;
 
@@ -195,109 +199,121 @@ void SoftBodyObject::CreateShapeCornerSprings() {
 
 	SoftBodyJoint* topBotRight = GetShapeCorners(false, false, true);
 	lowMaxJoints["topBotRight"] = topBotRight;
+}
 
+void SoftBodyObject::CreateShapeCornerSprings() {
 	// diagonal springs
-	Spring* supportSpring1 = new Spring(botBotLeft, topTopRight, 1, (botBotLeft->GetTransform().GetPosition() - topTopRight->GetTransform().GetPosition()).Length(), 1);
+	Spring* supportSpring1 = new Spring(lowMaxJoints.at("botBotLeft"), lowMaxJoints.at("topTopRight"), 1, true);
 	AddSpring(supportSpring1);
 
-	Spring* supportSpring2 = new Spring(topBotLeft, botTopRight, 1, (topBotLeft->GetTransform().GetPosition() - botTopRight->GetTransform().GetPosition()).Length(), 1);
+	Spring* supportSpring2 = new Spring(lowMaxJoints.at("topBotLeft"), lowMaxJoints.at("botTopRight"), 1, true);
 	AddSpring(supportSpring2);
 
-	Spring* supportSpring3 = new Spring(botTopLeft, topBotRight, 1, (botBotLeft->GetTransform().GetPosition() - topTopRight->GetTransform().GetPosition()).Length(), 1);
+	Spring* supportSpring3 = new Spring(lowMaxJoints.at("botTopLeft"), lowMaxJoints.at("topBotRight"), 1, true);
 	AddSpring(supportSpring3);
 
-	Spring* supportSpring4 = new Spring(botBotRight, topTopLeft, 1, (topBotLeft->GetTransform().GetPosition() - botTopRight->GetTransform().GetPosition()).Length(), 1);
+	Spring* supportSpring4 = new Spring(lowMaxJoints.at("botBotRight"), lowMaxJoints.at("topTopLeft"), 1, true);
 	AddSpring(supportSpring4);
 
 	// cube springs
-	Spring* supportSpring5 = new Spring(botBotLeft, topBotLeft, 1, (botBotLeft->GetTransform().GetPosition() - topBotLeft->GetTransform().GetPosition()).Length(), 1);
+	Spring* supportSpring5 = new Spring(lowMaxJoints.at("botBotLeft"), lowMaxJoints.at("topBotLeft"), 1, true);
 	AddSpring(supportSpring5);
 
-	Spring* supportSpring6 = new Spring(topTopRight, botTopRight, 1, (topTopRight->GetTransform().GetPosition() - botTopRight->GetTransform().GetPosition()).Length(), 1);
+	Spring* supportSpring6 = new Spring(lowMaxJoints.at("topTopRight"), lowMaxJoints.at("botTopRight"), 1, true);
 	AddSpring(supportSpring6);
 
-	Spring* supportSpring7 = new Spring(botTopLeft, topTopLeft, 1, (botTopLeft->GetTransform().GetPosition() - topTopLeft->GetTransform().GetPosition()).Length(), 1);
+	Spring* supportSpring7 = new Spring(lowMaxJoints.at("botTopLeft"), lowMaxJoints.at("topTopLeft"), 1, true);
 	AddSpring(supportSpring7);
 
-	Spring* supportSpring8 = new Spring(botBotRight, topBotRight, 1, (botBotRight->GetTransform().GetPosition() - topBotRight->GetTransform().GetPosition()).Length(), 1);
+	Spring* supportSpring8 = new Spring(lowMaxJoints.at("botBotRight"), lowMaxJoints.at("topBotRight"), 1, true);
 	AddSpring(supportSpring8);
+}
 
-	// connect cube to axis springs
+void SoftBodyObject::ConnectShapeCornersToAxisSprings() {
+	ConnectShapeCornersXAxis();
+	ConnectShapeCornersYAxis();
+	ConnectShapeCornersZAxis();
+}
 
-	// y axis
-	Spring* supportSpring9 = new Spring(topBotLeft, lowMaxJoints.at("maxY"), 1, (topBotLeft->GetTransform().GetPosition() - lowMaxJoints.at("maxY")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring9);
-
-	Spring* supportSpring10 = new Spring(topTopRight, lowMaxJoints.at("maxY"), 1, (topTopRight->GetTransform().GetPosition() - lowMaxJoints.at("maxY")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring10);
-
-	Spring* supportSpring11 = new Spring(topTopLeft, lowMaxJoints.at("maxY"), 1, (topTopLeft->GetTransform().GetPosition() - lowMaxJoints.at("maxY")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring11);
-
-	Spring* supportSpring12 = new Spring(topBotRight, lowMaxJoints.at("maxY"), 1, (topBotRight->GetTransform().GetPosition() - lowMaxJoints.at("maxY")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring12);
-
-	Spring* supportSpring13 = new Spring(botBotLeft, lowMaxJoints.at("lowY"), 1, (botBotLeft->GetTransform().GetPosition() - lowMaxJoints.at("lowY")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring13);
-
-	Spring* supportSpring14 = new Spring(botTopRight, lowMaxJoints.at("lowY"), 1, (botTopRight->GetTransform().GetPosition() - lowMaxJoints.at("lowY")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring14);
-
-	Spring* supportSpring15 = new Spring(botTopLeft, lowMaxJoints.at("lowY"), 1, (botTopLeft->GetTransform().GetPosition() - lowMaxJoints.at("lowY")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring15);
-
-	Spring* supportSpring16 = new Spring(botBotRight, lowMaxJoints.at("lowY"), 1, (botBotRight->GetTransform().GetPosition() - lowMaxJoints.at("lowY")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring16);
-
+void SoftBodyObject::ConnectShapeCornersXAxis() {
 	// x axis
-	Spring* supportSpring17 = new Spring(botBotLeft, lowMaxJoints.at("lowX"), 1, (botBotLeft->GetTransform().GetPosition() - lowMaxJoints.at("lowX")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring17);
+	Spring* supportSpring1 = new Spring(lowMaxJoints.at("botBotLeft"), lowMaxJoints.at("lowX"), 1, true);
+	AddSpring(supportSpring1);
 
-	Spring* supportSpring18 = new Spring(botTopLeft, lowMaxJoints.at("lowX"), 1, (botTopLeft->GetTransform().GetPosition() - lowMaxJoints.at("lowX")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring18);
+	Spring* supportSpring2 = new Spring(lowMaxJoints.at("botTopLeft"), lowMaxJoints.at("lowX"), 1, true);
+	AddSpring(supportSpring2);
 
-	Spring* supportSpring19 = new Spring(topBotLeft, lowMaxJoints.at("lowX"), 1, (topBotLeft->GetTransform().GetPosition() - lowMaxJoints.at("lowX")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring19);
+	Spring* supportSpring3 = new Spring(lowMaxJoints.at("topBotLeft"), lowMaxJoints.at("lowX"), 1, true);
+	AddSpring(supportSpring3);
 
-	Spring* supportSpring20 = new Spring(topTopLeft, lowMaxJoints.at("lowX"), 1, (topTopLeft->GetTransform().GetPosition() - lowMaxJoints.at("lowX")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring20);
+	Spring* supportSpring4 = new Spring(lowMaxJoints.at("topTopLeft"), lowMaxJoints.at("lowX"), 1, true);
+	AddSpring(supportSpring4);
 
-	Spring* supportSpring21 = new Spring(botBotRight, lowMaxJoints.at("maxX"), 1, (botBotRight->GetTransform().GetPosition() - lowMaxJoints.at("maxX")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring21);
+	Spring* supportSpring5 = new Spring(lowMaxJoints.at("botBotRight"), lowMaxJoints.at("maxX"), 1, true);
+	AddSpring(supportSpring5);
 
-	Spring* supportSpring22 = new Spring(botTopRight, lowMaxJoints.at("maxX"), 1, (botTopRight->GetTransform().GetPosition() - lowMaxJoints.at("maxX")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring22);
+	Spring* supportSpring6 = new Spring(lowMaxJoints.at("botTopRight"), lowMaxJoints.at("maxX"), 1, true);
+	AddSpring(supportSpring6);
 
-	Spring* supportSpring23 = new Spring(topBotRight, lowMaxJoints.at("maxX"), 1, (topBotRight->GetTransform().GetPosition() - lowMaxJoints.at("maxX")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring23);
+	Spring* supportSpring7 = new Spring(lowMaxJoints.at("topBotRight"), lowMaxJoints.at("maxX"), 1, true);
+	AddSpring(supportSpring7);
 
-	Spring* supportSpring24 = new Spring(topTopRight, lowMaxJoints.at("maxX"), 1, (topTopRight->GetTransform().GetPosition() - lowMaxJoints.at("maxX")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring24);
+	Spring* supportSpring8 = new Spring(lowMaxJoints.at("topTopRight"), lowMaxJoints.at("maxX"), 1, true);
+	AddSpring(supportSpring8);
+}
 
+void SoftBodyObject::ConnectShapeCornersYAxis() {
+	// y axis
+	Spring* supportSpring1 = new Spring(lowMaxJoints.at("topBotLeft"), lowMaxJoints.at("maxY"), 1, true);
+	AddSpring(supportSpring1);
+
+	Spring* supportSpring2 = new Spring(lowMaxJoints.at("topTopRight"), lowMaxJoints.at("maxY"), 1, true);
+	AddSpring(supportSpring2);
+
+	Spring* supportSpring3 = new Spring(lowMaxJoints.at("topTopLeft"), lowMaxJoints.at("maxY"), 1, true);
+	AddSpring(supportSpring3);
+
+	Spring* supportSpring4 = new Spring(lowMaxJoints.at("topBotRight"), lowMaxJoints.at("maxY"), 1, true);
+	AddSpring(supportSpring4);
+
+	Spring* supportSpring5 = new Spring(lowMaxJoints.at("botBotLeft"), lowMaxJoints.at("lowY"), 1, true);
+	AddSpring(supportSpring5);
+
+	Spring* supportSpring6 = new Spring(lowMaxJoints.at("botTopRight"), lowMaxJoints.at("lowY"), 1, true);
+	AddSpring(supportSpring6);
+
+	Spring* supportSpring7 = new Spring(lowMaxJoints.at("botTopLeft"), lowMaxJoints.at("lowY"), 1, true);
+	AddSpring(supportSpring7);
+
+	Spring* supportSpring8 = new Spring(lowMaxJoints.at("botBotRight"), lowMaxJoints.at("lowY"), 1, true);
+	AddSpring(supportSpring8);
+}
+
+void SoftBodyObject::ConnectShapeCornersZAxis() {
 	// z axis
-	Spring* supportSpring25 = new Spring(botBotLeft, lowMaxJoints.at("lowZ"), 1, (botBotLeft->GetTransform().GetPosition() - lowMaxJoints.at("lowZ")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring25);
+	Spring* supportSpring1 = new Spring(lowMaxJoints.at("botBotLeft"), lowMaxJoints.at("lowZ"), 1, true);
+	AddSpring(supportSpring1);
 
-	Spring* supportSpring26 = new Spring(botBotRight, lowMaxJoints.at("lowZ"), 1, (botBotRight->GetTransform().GetPosition() - lowMaxJoints.at("lowZ")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring26);
+	Spring* supportSpring2 = new Spring(lowMaxJoints.at("botBotRight"), lowMaxJoints.at("lowZ"), 1, true);
+	AddSpring(supportSpring2);
 
-	Spring* supportSpring27 = new Spring(topBotLeft, lowMaxJoints.at("lowZ"), 1, (topBotLeft->GetTransform().GetPosition() - lowMaxJoints.at("lowZ")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring27);
+	Spring* supportSpring3 = new Spring(lowMaxJoints.at("topBotLeft"), lowMaxJoints.at("lowZ"), 1, true);
+	AddSpring(supportSpring3);
 
-	Spring* supportSpring28 = new Spring(topBotRight, lowMaxJoints.at("lowZ"), 1, (topBotRight->GetTransform().GetPosition() - lowMaxJoints.at("lowZ")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring28);
+	Spring* supportSpring4 = new Spring(lowMaxJoints.at("topBotRight"), lowMaxJoints.at("lowZ"), true, true);
+	AddSpring(supportSpring4);
 
-	Spring* supportSpring29 = new Spring(botTopLeft, lowMaxJoints.at("maxZ"), 1, (botTopLeft->GetTransform().GetPosition() - lowMaxJoints.at("maxZ")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring29);
+	Spring* supportSpring5 = new Spring(lowMaxJoints.at("botTopLeft"), lowMaxJoints.at("maxZ"), 1, true);
+	AddSpring(supportSpring5);
 
-	Spring* supportSpring30 = new Spring(botTopRight, lowMaxJoints.at("maxZ"), 1, (botTopRight->GetTransform().GetPosition() - lowMaxJoints.at("maxZ")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring30);
+	Spring* supportSpring6 = new Spring(lowMaxJoints.at("botTopRight"), lowMaxJoints.at("maxZ"), 1, true);
+	AddSpring(supportSpring6);
 
-	Spring* supportSpring31 = new Spring(topTopLeft, lowMaxJoints.at("maxZ"), 1, (topTopLeft->GetTransform().GetPosition() - lowMaxJoints.at("maxZ")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring31);
+	Spring* supportSpring7 = new Spring(lowMaxJoints.at("topTopLeft"), lowMaxJoints.at("maxZ"), 1, true);
+	AddSpring(supportSpring7);
 
-	Spring* supportSpring32 = new Spring(topTopRight, lowMaxJoints.at("maxZ"), 1, (topTopRight->GetTransform().GetPosition() - lowMaxJoints.at("maxZ")->GetTransform().GetPosition()).Length(), 1);
-	AddSpring(supportSpring32);
+	Spring* supportSpring8 = new Spring(lowMaxJoints.at("topTopRight"), lowMaxJoints.at("maxZ"), 1, true);
+	AddSpring(supportSpring8);
 }
 
 SoftBodyJoint* SoftBodyObject::GetShapeCorners(bool lowX, bool lowY, bool lowZ) {

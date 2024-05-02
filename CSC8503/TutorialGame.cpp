@@ -612,7 +612,7 @@ void TutorialGame::BridgeConstraintTest(Vector3 startPosition) {
 void TutorialGame::SpringTest(Vector3 anchorPosition, Vector3 bobPosition) {
 	ParticleObject* tempAnchor = AddSoftBodyJoint(anchorPosition, 1);
 	ParticleObject* tempBob = AddSoftBodyJoint(bobPosition, 1);
-	mTestSpring = new Spring(tempAnchor, tempBob, .01f, 400);
+	mTestSpring = new Spring(tempAnchor, tempBob, .01f, 400.f);
 }
 
 void TutorialGame::SoftBodyTest() {
@@ -639,31 +639,31 @@ void TutorialGame::SoftBodyCubeTest(SoftBodyObject* softBody) {
 	SoftBodyJoint* topTopRight = AddSoftBodyJoint(Vector3(75, 75, 75), 1);
 	softBody->AddJoint(topTopRight);
 
-	Spring* temp1 = new Spring(botBotLeft, botTopLeft, 0.01f, 50);
+	Spring* temp1 = new Spring(botBotLeft, botTopLeft, 0.01f, 50.f);
 	softBody->AddSpring(temp1);
-	Spring* temp2 = new Spring(botBotRight, botTopRight, 0.01f, 50);
+	Spring* temp2 = new Spring(botBotRight, botTopRight, 0.01f, 50.f);
 	softBody->AddSpring(temp2);
-	Spring* temp3 = new Spring(topBotLeft, topTopLeft, 0.01f, 50);
+	Spring* temp3 = new Spring(topBotLeft, topTopLeft, 0.01f, 50.f);
 	softBody->AddSpring(temp3);
-	Spring* temp4 = new Spring(topBotRight, topTopRight, 0.01f, 50);
+	Spring* temp4 = new Spring(topBotRight, topTopRight, 0.01f, 50.f);
 	softBody->AddSpring(temp4);
 
-	Spring* temp5 = new Spring(botBotLeft, topBotLeft, 0.01f, 50);
+	Spring* temp5 = new Spring(botBotLeft, topBotLeft, 0.01f, 50.f);
 	softBody->AddSpring(temp5);
-	Spring* temp6 = new Spring(botBotRight, topBotRight, 0.01f, 50);
+	Spring* temp6 = new Spring(botBotRight, topBotRight, 0.01f, 50.f);
 	softBody->AddSpring(temp6);
-	Spring* temp7 = new Spring(botTopLeft, topTopLeft, 0.01f, 50);
+	Spring* temp7 = new Spring(botTopLeft, topTopLeft, 0.01f, 50.f);
 	softBody->AddSpring(temp7);
-	Spring* temp8 = new Spring(botTopRight, topTopRight, 0.01f, 50);
+	Spring* temp8 = new Spring(botTopRight, topTopRight, 0.01f, 50.f);
 	softBody->AddSpring(temp8);
 
-	Spring* temp9 = new Spring(botBotLeft, botBotRight, 0.01f, 50);
+	Spring* temp9 = new Spring(botBotLeft, botBotRight, 0.01f, 50.f);
 	softBody->AddSpring(temp9);
-	Spring* temp10 = new Spring(botTopLeft, botTopRight, 0.01f, 50);
+	Spring* temp10 = new Spring(botTopLeft, botTopRight, 0.01f, 50.f);
 	softBody->AddSpring(temp10);
-	Spring* temp11 = new Spring(topBotLeft, topBotRight, 0.01f, 50);
+	Spring* temp11 = new Spring(topBotLeft, topBotRight, 0.01f, 50.f);
 	softBody->AddSpring(temp11);
-	Spring* temp12 = new Spring(topTopLeft, topTopRight, 0.01f, 50);
+	Spring* temp12 = new Spring(topTopLeft, topTopRight, 0.01f, 50.f);
 	softBody->AddSpring(temp12);
 
 	// support springs

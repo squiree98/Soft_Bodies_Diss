@@ -6,7 +6,18 @@
 
 using namespace NCL::CSC8503;
 
-Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, float restLength, int ix)
+Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, bool debugSpring) {
+	mAnchor = anchor;
+	mBob = bob;
+
+	mRestLength = (anchor->GetTransform().GetPosition() - mBob->GetTransform().GetPosition()).Length();
+
+	mSpringConstant = springConstant;
+
+	showDebugSpring = debugSpring;
+}
+
+Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, float restLength, bool debugSpring)
 {
 	mAnchor = anchor;
 	mBob = bob;
@@ -15,7 +26,7 @@ Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant
 
 	mSpringConstant = springConstant;
 
-	x = ix;
+	showDebugSpring = debugSpring;
 }
 
 Spring::~Spring()
@@ -24,7 +35,8 @@ Spring::~Spring()
 
 void Spring::Update(float dt)
 {
-	if (x == 1) NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), NCL::Debug::MAGENTA);
+	if (showDebugSpring)
+		NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), NCL::Debug::MAGENTA);
 
 	mCurrentLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
 
