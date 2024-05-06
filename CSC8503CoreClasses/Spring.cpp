@@ -6,7 +6,7 @@
 
 using namespace NCL::CSC8503;
 
-Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, bool debugSpring) {
+Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, bool debugSpring, Vector4 colour) {
 	mAnchor = anchor;
 	mBob = bob;
 
@@ -15,9 +15,11 @@ Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant
 	mSpringConstant = springConstant;
 
 	showDebugSpring = debugSpring;
+
+	springColour = colour;
 }
 
-Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, float restLength, bool debugSpring)
+Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant, float restLength, bool debugSpring, Vector4 colour)
 {
 	mAnchor = anchor;
 	mBob = bob;
@@ -27,6 +29,8 @@ Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant
 	mSpringConstant = springConstant;
 
 	showDebugSpring = debugSpring;
+
+	springColour = colour;
 }
 
 Spring::~Spring()
@@ -35,13 +39,12 @@ Spring::~Spring()
 
 void Spring::Update(float dt)
 {
-	if (showDebugSpring)
-		NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), NCL::Debug::MAGENTA);
 
+	if (showDebugSpring)
+		NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), springColour);
 	mCurrentLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
 
-	if (int(mCurrentLength.Length()) == int(mRestLength))
-	{
+	if (int(mCurrentLength.Length()) == int(mRestLength)) {
 		mBob->GetPhysicsObject()->ClearForces();
 		mAnchor->GetPhysicsObject()->ClearForces();
 
@@ -68,4 +71,8 @@ void Spring::Update(float dt)
 		mBob->GetPhysicsObject()->ApplyLinearImpulse(force);
 		mAnchor->GetPhysicsObject()->ApplyLinearImpulse(-force);
 	}
+}
+
+Vector3 Spring::GetMidPoint() {
+	return ((mAnchor->GetTransform().GetPosition() - mBob->GetTransform().GetPosition()) / 2) + mBob->GetTransform().GetPosition();
 }

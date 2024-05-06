@@ -33,3 +33,7 @@ SoftBodyJoint::SoftBodyJoint(Vector3 position, float radius, GameWorld* world) {
 SoftBodyJoint::~SoftBodyJoint() {
 
 }
+
+void SoftBodyJoint::DrawDebugJoint() {
+	NCL::Debug::DrawLine(transform.GetPosition(), Vector3(0, 0, 0));
+}

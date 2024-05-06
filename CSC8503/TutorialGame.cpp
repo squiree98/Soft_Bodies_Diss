@@ -56,7 +56,7 @@ void TutorialGame::InitialiseAssets() {
 	bonusMesh	= renderer->LoadMesh("apple.msh");
 	cylinderMesh = renderer->LoadMesh("Cylinder.msh");
 
-	softBodyMesh = renderer->LoadMesh("Sphere.msh");
+	softBodyMesh = renderer->LoadMesh("Cylinder.msh");
 	softBofyMaterial = renderer->LoadMaterial("Role_T.mat");
 	tempAnim = renderer->LoadAnimation("Role_T.anm");
 
@@ -86,6 +86,7 @@ TutorialGame::~TutorialGame()	{
 void TutorialGame::UpdateGame(float dt) {
 
 	softBodyTest->UpdateSoftBody(dt);
+
 	if (OGLMesh* tempMesh = dynamic_cast<OGLMesh*>(softBodyTest->GetRenderObject()->GetMesh())) {
 		unsigned int start = 0;
 		unsigned int count = tempMesh->GetPositionData().size();
@@ -283,7 +284,7 @@ void TutorialGame::InitWorld() {
 
 	// SoftBodyTest();
 
-	softBodyTest = new SoftBodyObject(softBodyMesh, world, basicTex, basicShader, Vector3(0, 40, 0), Vector3(20, 20, 20));
+	softBodyTest = new SoftBodyObject(softBodyMesh, world, basicTex, basicShader, Vector3(0, 0, 0), Vector3(20, 20, 20));
 
 	//InitGameExamples();
 	InitDefaultFloor();

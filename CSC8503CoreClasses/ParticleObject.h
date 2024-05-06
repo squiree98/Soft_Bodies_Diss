@@ -10,6 +10,8 @@ public:
 	ParticleObject(Vector3 position, float radius);
 	~ParticleObject();
 
+	const float GetRadius() { return mRadius; }
+
 protected:
 	float mRadius;
 };
