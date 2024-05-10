@@ -12,7 +12,7 @@ class SoftBodyObject : public GameObject
 {
 public:
 	SoftBodyObject();
-	SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1), float springStrength = .25f, float particleSize = 1);
+	SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1), float springStrength = 1.f, float particleSize = 1.f);
 	~SoftBodyObject();
 
 	// will update two things
@@ -22,7 +22,7 @@ public:
 
 	vector<SoftBodyJoint*> GetJoints() { return softBodyMeshJoints; }
 
-	vector<Spring*> GetSprings() { return softBodySpringsTemp; }
+	vector<Spring*> GetSprings() { return softBodyMeshSprings; }
 
 	SoftBodyJoint* GetJointWithVertIndex(int index);
 
@@ -30,12 +30,16 @@ public:
 		softBodyMeshJoints.push_back(joint);
 	}
 
-	void AddSpring(Spring* spring) { softBodySpringsTemp.push_back(spring); }
+	void AddSpring(Spring* spring) { softBodyMeshSprings.push_back(spring); }
 
 
 protected:
 
 	void UpdateSprings(float dt) const;
+
+	void UpdateGPUData();
+
+	void UpdateAveragePositionAndAngle();
 
 	void ConvertParticlesToVertices();
 
@@ -48,6 +52,10 @@ protected:
 	void EnforceMaxSpringLength(Spring* spring);
 
 	void GiveShapeVolume();
+
+	void CreateTonesOfSprings(bool showSprings);
+
+	SoftBodyJoint* GetFurthestAwayJoint(SoftBodyJoint* joint);
 
 	void CreateXYZSprings(bool showSprings);
 
@@ -64,6 +72,9 @@ protected:
 	void ConnectShapeCornersYAxis(bool showSprings);
 	void ConnectShapeCornersZAxis(bool showSprings);
 
+	Vector3 averagePosition;
+	float averageAngle;
+
 	SoftBodyJoint* GetShapeCorners(bool lowX, bool lowY, bool lowZ);
 
 	Vector3 basePosition;
@@ -77,15 +88,13 @@ protected:
 	std::map<std::string, SoftBodyJoint*> lowMaxJoints;
 
 	// used to update springs to move joints
-	vector<Spring*> softBodySpringsTemp;
-	vector<Spring*> softBodySpringsFinal;
-
-	int numberOfVertices;
+	vector<Spring*> softBodyMeshSprings;
+	vector<Spring*> softBodyAllSprings;
 
 	GameWorld* currentWorld;
 
 	float particleRadius;
 	float springConstant;
 
-	float maxSpringLength = 30.f;
+	float maxSpringLength = 1000;
 };

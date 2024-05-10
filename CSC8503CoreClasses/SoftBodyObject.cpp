@@ -18,7 +18,6 @@ SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* 
 	CreateJoints(mesh, position, scale);
 	SetRenderObject(new RenderObject(&GetTransform(), mesh, texture, shader));
 
-	numberOfVertices = mesh->GetPositionData().size();
 	currentWorld->AddGameObject(this);
 
 	GiveShapeVolume();
@@ -26,11 +25,11 @@ SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* 
 
 SoftBodyObject::~SoftBodyObject()
 {
-	for (SoftBodyJoint* joint : softBodyMeshJoints) {
+	for (SoftBodyJoint* joint : allJoints) {
 		delete(joint);
 	}
 
-	for (Spring* spring : softBodySpringsTemp) {
+	for (Spring* spring : softBodyAllSprings) {
 		delete(spring);
 	}
 }
@@ -38,23 +37,47 @@ SoftBodyObject::~SoftBodyObject()
 void SoftBodyObject::UpdateSoftBody(float dt) {
 	UpdateSprings(dt);
 
-	/*for (SoftBodyJoint* x : allJoints) {
-		x->DrawDebugJoint();
-	}*/
+	UpdateGPUData();
+
+	//UpdateAveragePositionAndAngle();
 
 	ConvertParticlesToVertices();
 }
 
 void SoftBodyObject::UpdateSprings(float dt) const {
-	int counter = 0;
-	for (Spring* x : softBodySpringsFinal) {
+	for (Spring* x : softBodyAllSprings) {
 		x->Update(dt);
-		counter++;
+	}
+}
+
+void SoftBodyObject::UpdateGPUData() {
+	unsigned int start = 0;
+	unsigned int count = renderObject->GetMesh()->GetPositionData().size();
+	renderObject->GetMesh()->UpdateGPUPositionData(start, count);
+}
+
+void SoftBodyObject::UpdateAveragePositionAndAngle() {
+	Vector3 averagePos = Vector3(0, 0, 0);
+	int count = 0;
+	for (SoftBodyJoint* joint : allJoints) {
+		averagePos += joint->GetTransform().GetPosition();
+		count++;
+	}
+	averagePosition = averagePos / count;
+
+	for (SoftBodyJoint* joint : allJoints) {
+		Vector3 jointOffset = joint->GetTransform().GetPosition() - averagePosition;
+
+		Vector3 sideOne = jointOffset - averagePosition;
+		Vector3 sideTwo = joint->GetTransform().GetPosition() - averagePosition;
+		Vector3 force = (joint->GetBaseOffset() + averagePosition) - joint->GetTransform().GetPosition();
+
+		//joint->GetPhysicsObject()->AddForce(force);
 	}
 }
 
 void SoftBodyObject::ConvertParticlesToVertices() {
-	vector<Vector3> tempVertices(numberOfVertices);
+	vector<Vector3> tempVertices(renderObject->GetMesh()->GetPositionData().size());
 
 	for (SoftBodyJoint* joint : softBodyMeshJoints) {
 		for (int x : joint->GetVertexIndices()) {
@@ -65,12 +88,12 @@ void SoftBodyObject::ConvertParticlesToVertices() {
 	renderObject->GetMesh()->SetVertexPositions(tempVertices);
 }
 
-void SoftBodyObject::CreateJoints(NCL::Rendering::Mesh* mesh , Vector3 position, Vector3 scale) {
+void SoftBodyObject::CreateJoints(NCL::Rendering::Mesh* mesh, Vector3 position, Vector3 scale) {
 	CreateBodyVertices(mesh, position, scale);
 
 	CreateBodySprings(mesh);
 
-	for (Spring* spring : softBodySpringsTemp) {
+	for (Spring* spring : softBodyMeshSprings) {
 		EnforceMaxSpringLength(spring);
 	}
 
@@ -87,7 +110,6 @@ void SoftBodyObject::CreateBodyVertices(NCL::Mesh* mesh, Vector3 position, Vecto
 	int counter = 0;
 	// create joints using vertices
 	for (Vector3 vertPos : mesh->GetPositionData()) {
-		Transform tempTransform;
 		vertPos *= scale;
 		vertPos += (position);
 		if (!CheckVectorHasValue(previousPositions, vertPos)) {
@@ -111,20 +133,17 @@ void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh) {
 	int counter = 0;
 	// created springs using indices
 	for (signed int indicesIndex : mesh->GetIndexData()) {
-		if (counter != mesh->GetIndexData().size() - 1)
-		{
+		if (counter != mesh->GetIndexData().size() - 1) {
 			SoftBodyJoint* tempJoint1 = GetJointWithVertIndex(mesh->GetIndexData()[counter]);
 			SoftBodyJoint* tempJoint2 = GetJointWithVertIndex(mesh->GetIndexData()[counter + 1]);
 			bool addSpring = true;
-			for (Spring* spring : softBodySpringsTemp) {
+			for (Spring* spring : softBodyMeshSprings) {
 				if ((tempJoint1 == spring->GetBob() && tempJoint2 == spring->GetAnchor()) || (tempJoint1 == spring->GetAnchor() && tempJoint2 == spring->GetBob()))
 					addSpring = false;
 			}
 			if (addSpring) {
 				Spring* tempSpring = new Spring(tempJoint1, tempJoint2, springConstant);
-				if (tempSpring->GetLength() > 35)
-					tempSpring = new Spring(tempJoint1, tempJoint2, springConstant);
-				softBodySpringsTemp.push_back(tempSpring);
+				softBodyMeshSprings.push_back(tempSpring);
 			}
 			counter++;
 		}
@@ -134,25 +153,54 @@ void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh) {
 void SoftBodyObject::EnforceMaxSpringLength(Spring* spring) {
 	if (spring->GetLength() > maxSpringLength) {
 		SoftBodyJoint* supportJoint = new SoftBodyJoint(spring->GetMidPoint(), particleRadius, currentWorld);
-		Spring* newSpring1 = new Spring(spring->GetAnchor(), supportJoint, springConstant);
-		Spring* newSpring2 = new Spring(spring->GetBob(), supportJoint, springConstant);
+		Spring* newSpring1 = new Spring(spring->GetAnchor(), supportJoint, springConstant/2, true, NCL::Debug::BLUE);
+		Spring* newSpring2 = new Spring(spring->GetBob(), supportJoint, springConstant/2, true, NCL::Debug::GREEN);
 		extraSupportJoints.push_back(supportJoint);
 		EnforceMaxSpringLength(newSpring1);
 		EnforceMaxSpringLength(newSpring2);
 	}
 	else {
-		softBodySpringsFinal.push_back(spring);
+		softBodyAllSprings.push_back(spring);
 	}
 }
 
 void SoftBodyObject::GiveShapeVolume() {
-	CreateXYZSprings(true);
+	CreateTonesOfSprings(true);
 
-	GetShapeCorners();
+	//CreateXYZSprings(true);
 
-	CreateShapeCornerSprings(true);
+	//GetShapeCorners();
 
-	ConnectShapeCornersToAxisSprings();
+	//CreateShapeCornerSprings(true);
+
+	//ConnectShapeCornersToAxisSprings();
+}
+
+void SoftBodyObject::CreateTonesOfSprings(bool showSprings) {
+	for (SoftBodyJoint* currentJoint : softBodyMeshJoints) {
+		SoftBodyJoint* furthestJoint = GetFurthestAwayJoint(currentJoint);
+		bool addSpring = true;
+		for (Spring* spring : softBodyMeshSprings) {
+			if ((currentJoint == spring->GetBob() && furthestJoint == spring->GetAnchor()) || (currentJoint == spring->GetAnchor() && furthestJoint == spring->GetBob()))
+				addSpring = false;
+		}
+		if (addSpring) {
+			Spring* tempSpring = new Spring(currentJoint, furthestJoint, springConstant, showSprings, NCL::Debug::YELLOW);
+			softBodyAllSprings.push_back(tempSpring);
+		}
+	}
+}
+
+SoftBodyJoint* SoftBodyObject::GetFurthestAwayJoint(SoftBodyJoint* joint) {
+	float maxDistance = FLT_MIN;
+	SoftBodyJoint* furthestJoint;
+	for (SoftBodyJoint* tempJoint : softBodyMeshJoints) {
+		if ((joint->GetTransform().GetPosition() - tempJoint->GetTransform().GetPosition()).Length() > maxDistance) {
+			furthestJoint = tempJoint;
+			maxDistance = (joint->GetTransform().GetPosition() - tempJoint->GetTransform().GetPosition()).Length();
+		}
+	}
+	return furthestJoint;
 }
 
 void SoftBodyObject::CreateXYZSprings(bool showSprings) {
@@ -160,19 +208,19 @@ void SoftBodyObject::CreateXYZSprings(bool showSprings) {
 
 	GetSmallestAndLargestValue('y', array);
 	Spring* ySpring = new Spring(array[0], array[1], springConstant, showSprings, NCL::Debug::RED);
-	softBodySpringsFinal.push_back(ySpring);
+	softBodyAllSprings.push_back(ySpring);
 	lowMaxJoints["lowY"] = array[0];
 	lowMaxJoints["maxY"] = array[1];
 
 	GetSmallestAndLargestValue('x', array);
 	Spring* xSpring = new Spring(array[0], array[1], springConstant, showSprings, NCL::Debug::RED);
-	softBodySpringsFinal.push_back(xSpring);
+	softBodyAllSprings.push_back(xSpring);
 	lowMaxJoints["lowX"] = array[0];
 	lowMaxJoints["maxX"] = array[1];
 
 	GetSmallestAndLargestValue('z', array);
 	Spring* zSpring = new Spring(array[0], array[1], springConstant, showSprings, NCL::Debug::RED);
-	softBodySpringsFinal.push_back(zSpring);
+	softBodyAllSprings.push_back(zSpring);
 	lowMaxJoints["lowZ"] = array[0];
 	lowMaxJoints["maxZ"] = array[1];
 }
@@ -288,29 +336,16 @@ void SoftBodyObject::GetShapeCorners() {
 void SoftBodyObject::CreateShapeCornerSprings(bool showSprings) {
 	// diagonal springs
 	Spring* supportSpring1 = new Spring(lowMaxJoints.at("botBotLeft"), lowMaxJoints.at("topTopRight"), springConstant, showSprings, NCL::Debug::CYAN);
-	softBodySpringsFinal.push_back(supportSpring1);
+	softBodyAllSprings.push_back(supportSpring1);
 
 	Spring* supportSpring2 = new Spring(lowMaxJoints.at("topBotLeft"), lowMaxJoints.at("botTopRight"), springConstant, showSprings, NCL::Debug::CYAN);
-	softBodySpringsFinal.push_back(supportSpring2);
+	softBodyAllSprings.push_back(supportSpring2);
 
 	Spring* supportSpring3 = new Spring(lowMaxJoints.at("botTopLeft"), lowMaxJoints.at("topBotRight"), springConstant, showSprings, NCL::Debug::CYAN);
-	softBodySpringsFinal.push_back(supportSpring3);
+	softBodyAllSprings.push_back(supportSpring3);
 
 	Spring* supportSpring4 = new Spring(lowMaxJoints.at("botBotRight"), lowMaxJoints.at("topTopLeft"), springConstant, showSprings, NCL::Debug::CYAN);
-	softBodySpringsFinal.push_back(supportSpring4);
-
-	// cube springs
-	Spring* supportSpring5 = new Spring(lowMaxJoints.at("botBotLeft"), lowMaxJoints.at("topBotLeft"), springConstant, showSprings, NCL::Debug::CYAN);
-	softBodySpringsFinal.push_back(supportSpring5);
-
-	Spring* supportSpring6 = new Spring(lowMaxJoints.at("topTopRight"), lowMaxJoints.at("botTopRight"), springConstant, showSprings, NCL::Debug::CYAN);
-	softBodySpringsFinal.push_back(supportSpring6);
-
-	Spring* supportSpring7 = new Spring(lowMaxJoints.at("botTopLeft"), lowMaxJoints.at("topTopLeft"), springConstant, showSprings, NCL::Debug::CYAN);
-	softBodySpringsFinal.push_back(supportSpring7);
-
-	Spring* supportSpring8 = new Spring(lowMaxJoints.at("botBotRight"), lowMaxJoints.at("topBotRight"), springConstant, showSprings, NCL::Debug::CYAN);
-	softBodySpringsFinal.push_back(supportSpring8);
+	softBodyAllSprings.push_back(supportSpring4);
 }
 
 void SoftBodyObject::ConnectShapeCornersToAxisSprings() {
@@ -322,82 +357,82 @@ void SoftBodyObject::ConnectShapeCornersToAxisSprings() {
 void SoftBodyObject::ConnectShapeCornersXAxis(bool showSprings) {
 	// x axis
 	Spring* supportSpring1 = new Spring(lowMaxJoints.at("botBotLeft"), lowMaxJoints.at("lowX"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring1);
+	softBodyAllSprings.push_back(supportSpring1);
 
 	Spring* supportSpring2 = new Spring(lowMaxJoints.at("botTopLeft"), lowMaxJoints.at("lowX"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring2);
+	softBodyAllSprings.push_back(supportSpring2);
 
 	Spring* supportSpring3 = new Spring(lowMaxJoints.at("topBotLeft"), lowMaxJoints.at("lowX"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring3);
+	softBodyAllSprings.push_back(supportSpring3);
 
 	Spring* supportSpring4 = new Spring(lowMaxJoints.at("topTopLeft"), lowMaxJoints.at("lowX"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring4);
+	softBodyAllSprings.push_back(supportSpring4);
 
 	Spring* supportSpring5 = new Spring(lowMaxJoints.at("botBotRight"), lowMaxJoints.at("maxX"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring5);
+	softBodyAllSprings.push_back(supportSpring5);
 
 	Spring* supportSpring6 = new Spring(lowMaxJoints.at("botTopRight"), lowMaxJoints.at("maxX"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring6);
+	softBodyAllSprings.push_back(supportSpring6);
 
 	Spring* supportSpring7 = new Spring(lowMaxJoints.at("topBotRight"), lowMaxJoints.at("maxX"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring7);
+	softBodyAllSprings.push_back(supportSpring7);
 
 	Spring* supportSpring8 = new Spring(lowMaxJoints.at("topTopRight"), lowMaxJoints.at("maxX"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring8);
+	softBodyAllSprings.push_back(supportSpring8);
 }
 
 void SoftBodyObject::ConnectShapeCornersYAxis(bool showSprings) {
 	// y axis
 	Spring* supportSpring1 = new Spring(lowMaxJoints.at("topBotLeft"), lowMaxJoints.at("maxY"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring1);
+	softBodyAllSprings.push_back(supportSpring1);
 
 	Spring* supportSpring2 = new Spring(lowMaxJoints.at("topTopRight"), lowMaxJoints.at("maxY"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring2);
+	softBodyAllSprings.push_back(supportSpring2);
 
 	Spring* supportSpring3 = new Spring(lowMaxJoints.at("topTopLeft"), lowMaxJoints.at("maxY"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring3);
+	softBodyAllSprings.push_back(supportSpring3);
 
 	Spring* supportSpring4 = new Spring(lowMaxJoints.at("topBotRight"), lowMaxJoints.at("maxY"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring4);
+	softBodyAllSprings.push_back(supportSpring4);
 
 	Spring* supportSpring5 = new Spring(lowMaxJoints.at("botBotLeft"), lowMaxJoints.at("lowY"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring5);
+	softBodyAllSprings.push_back(supportSpring5);
 
 	Spring* supportSpring6 = new Spring(lowMaxJoints.at("botTopRight"), lowMaxJoints.at("lowY"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring6);
+	softBodyAllSprings.push_back(supportSpring6);
 
 	Spring* supportSpring7 = new Spring(lowMaxJoints.at("botTopLeft"), lowMaxJoints.at("lowY"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring7);
+	softBodyAllSprings.push_back(supportSpring7);
 
 	Spring* supportSpring8 = new Spring(lowMaxJoints.at("botBotRight"), lowMaxJoints.at("lowY"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring8);
+	softBodyAllSprings.push_back(supportSpring8);
 }
 
 void SoftBodyObject::ConnectShapeCornersZAxis(bool showSprings) {
 	// z axis
 	Spring* supportSpring1 = new Spring(lowMaxJoints.at("botBotLeft"), lowMaxJoints.at("lowZ"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring1);
+	softBodyAllSprings.push_back(supportSpring1);
 
 	Spring* supportSpring2 = new Spring(lowMaxJoints.at("botBotRight"), lowMaxJoints.at("lowZ"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring2);
+	softBodyAllSprings.push_back(supportSpring2);
 
 	Spring* supportSpring3 = new Spring(lowMaxJoints.at("topBotLeft"), lowMaxJoints.at("lowZ"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring3);
+	softBodyAllSprings.push_back(supportSpring3);
 
 	Spring* supportSpring4 = new Spring(lowMaxJoints.at("topBotRight"), lowMaxJoints.at("lowZ"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring4);
+	softBodyAllSprings.push_back(supportSpring4);
 
 	Spring* supportSpring5 = new Spring(lowMaxJoints.at("botTopLeft"), lowMaxJoints.at("maxZ"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring5);
+	softBodyAllSprings.push_back(supportSpring5);
 
 	Spring* supportSpring6 = new Spring(lowMaxJoints.at("botTopRight"), lowMaxJoints.at("maxZ"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring6);
+	softBodyAllSprings.push_back(supportSpring6);
 
 	Spring* supportSpring7 = new Spring(lowMaxJoints.at("topTopLeft"), lowMaxJoints.at("maxZ"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring7);
+	softBodyAllSprings.push_back(supportSpring7);
 
 	Spring* supportSpring8 = new Spring(lowMaxJoints.at("topTopRight"), lowMaxJoints.at("maxZ"), springConstant, showSprings, NCL::Debug::YELLOW);
-	softBodySpringsFinal.push_back(supportSpring8);
+	softBodyAllSprings.push_back(supportSpring8);
 }
 
 SoftBodyJoint* SoftBodyObject::GetShapeCorners(bool lowX, bool lowY, bool lowZ) {
