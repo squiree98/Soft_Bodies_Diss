@@ -16,10 +16,10 @@ public:
 	void AddVertIndex(int index) { vertexIndices.push_back(index); }
 	vector<int> GetVertexIndices() { return vertexIndices; }
 
-	Vector3 GetBaseOffset() { return baseOffset; }
+	Vector3 GetBasePosition() { return basePosition; }
 
 protected:
-	Vector3 baseOffset;;
+	Vector3 basePosition;
 
 	vector<int> vertexIndices;
 };

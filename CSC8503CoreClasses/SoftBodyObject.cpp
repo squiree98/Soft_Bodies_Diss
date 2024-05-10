@@ -7,8 +7,9 @@
 
 SoftBodyObject::SoftBodyObject() {}
 
-SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position, Vector3 scale, float springStrength, float particleSize)
-{
+SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position, Vector3 scale, float springStrength, float particleSize) {
+	basePosition = position;
+
 	currentWorld = world;
 
 	springConstant = springStrength;
@@ -39,7 +40,7 @@ void SoftBodyObject::UpdateSoftBody(float dt) {
 
 	UpdateGPUData();
 
-	//UpdateAveragePositionAndAngle();
+	UpdateAveragePositionAndAngle();
 
 	ConvertParticlesToVertices();
 }
@@ -57,22 +58,21 @@ void SoftBodyObject::UpdateGPUData() {
 }
 
 void SoftBodyObject::UpdateAveragePositionAndAngle() {
-	Vector3 averagePos = Vector3(0, 0, 0);
+	Vector3 totalPos = Vector3(0, 0, 0);
 	int count = 0;
 	for (SoftBodyJoint* joint : allJoints) {
-		averagePos += joint->GetTransform().GetPosition();
+		totalPos += joint->GetTransform().GetPosition();
 		count++;
 	}
-	averagePosition = averagePos / count;
+	averagePosition = totalPos / count;
 
 	for (SoftBodyJoint* joint : allJoints) {
-		Vector3 jointOffset = joint->GetTransform().GetPosition() - averagePosition;
+		Vector3 jointCurrentOffset = joint->GetTransform().GetPosition() - averagePosition;
+		Vector3 jointBaseOffset = joint->GetBasePosition() - basePosition;
 
-		Vector3 sideOne = jointOffset - averagePosition;
-		Vector3 sideTwo = joint->GetTransform().GetPosition() - averagePosition;
-		Vector3 force = (joint->GetBaseOffset() + averagePosition) - joint->GetTransform().GetPosition();
+		Vector3 force = jointBaseOffset - jointCurrentOffset;
 
-		//joint->GetPhysicsObject()->AddForce(force);
+		joint->GetPhysicsObject()->AddForce(force * 100);
 	}
 }
 

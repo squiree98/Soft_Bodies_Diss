@@ -12,7 +12,7 @@ SoftBodyJoint::SoftBodyJoint() {
 }
 
 SoftBodyJoint::SoftBodyJoint(Vector3 position, float radius, GameWorld* world) {
-	baseOffset = position;
+	basePosition = position;
 	Vector3 particleSize = Vector3(radius, radius, radius);
 	NCL::SphereVolume* volume = new NCL::SphereVolume(radius, true);
 	SetBoundingVolume((NCL::CollisionVolume*)volume);
