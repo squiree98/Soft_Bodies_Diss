@@ -2,6 +2,7 @@
 
 #include "Debug.h"
 #include "GameObject.h"
+#include "GeneralUse.h"
 #include "PhysicsObject.h"
 
 using namespace NCL::CSC8503;
@@ -10,7 +11,8 @@ Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant
 	mAnchor = anchor;
 	mBob = bob;
 
-	mRestLength = (anchor->GetTransform().GetPosition() - mBob->GetTransform().GetPosition()).Length();
+	mRestLength = (mAnchor->GetTransform().GetPosition() - mBob->GetTransform().GetPosition()).Length();
+	mCurrentLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
 
 	mSpringConstant = springConstant;
 
@@ -37,40 +39,30 @@ Spring::~Spring()
 {
 }
 
-void Spring::Update(float dt)
-{
+void Spring::Update(float dt) {
+	//if (showDebugSpring) 
+		//NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), springColour);
 
-	if (showDebugSpring)
-		NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), springColour);
 	mCurrentLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
+	
+	float displacement = mCurrentLength.Length() - (mRestLength/2);
+	displacement = abs(displacement);
 
-	if (int(mCurrentLength.Length()) == int(mRestLength)) {
-		mBob->GetPhysicsObject()->ClearForces();
-		mAnchor->GetPhysicsObject()->ClearForces();
-
+	// determine the direction of the springs force
+	Vector3 force;
+	switch (displacement > (mRestLength/2)) {
+	case(true):
+		force = -(mCurrentLength.Normalised());
+		break;
+	case(false):
+		force = mCurrentLength.Normalised();
+		break;
 	}
-	else
-	{
-		float displacement = mCurrentLength.Length() - (mRestLength / 2);
-		displacement = abs(displacement);
 
-		// determine the direction of the springs force
-		Vector3 force;
-		switch (displacement > (mRestLength / 2))
-		{
-		case(true):
-			force = -(mCurrentLength.Normalised());
-			break;
-		case(false):
-			force = mCurrentLength.Normalised();
-			break;
-		}
+	force *= mSpringConstant * displacement;
 
-		force *= mSpringConstant * displacement;
-
-		mBob->GetPhysicsObject()->ApplyLinearImpulse(force);
-		mAnchor->GetPhysicsObject()->ApplyLinearImpulse(-force);
-	}
+	mBob->GetPhysicsObject()->ApplyLinearImpulse(force);
+	mAnchor->GetPhysicsObject()->ApplyLinearImpulse(-force);
 }
 
 Vector3 Spring::GetMidPoint() {

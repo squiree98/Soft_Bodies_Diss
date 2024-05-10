@@ -56,7 +56,7 @@ void TutorialGame::InitialiseAssets() {
 	bonusMesh	= renderer->LoadMesh("apple.msh");
 	cylinderMesh = renderer->LoadMesh("Cylinder.msh");
 
-	softBodyMesh = renderer->LoadMesh("Cylinder.msh");
+	softBodyMesh = renderer->LoadMesh("sphere.msh");
 	softBofyMaterial = renderer->LoadMaterial("Role_T.mat");
 	tempAnim = renderer->LoadAnimation("Role_T.anm");
 
@@ -86,12 +86,6 @@ TutorialGame::~TutorialGame()	{
 void TutorialGame::UpdateGame(float dt) {
 
 	softBodyTest->UpdateSoftBody(dt);
-
-	if (OGLMesh* tempMesh = dynamic_cast<OGLMesh*>(softBodyTest->GetRenderObject()->GetMesh())) {
-		unsigned int start = 0;
-		unsigned int count = tempMesh->GetPositionData().size();
-		tempMesh->UpdateGPUBuffers(start, count);
-	}
 
 	if (!inSelectionMode) {
 		world->GetMainCamera().UpdateCamera(dt);
@@ -282,9 +276,10 @@ void TutorialGame::InitWorld() {
 
 	// SpringTest(Vector3(100, 100, 0), Vector3(100, 0, 0));
 
-	// SoftBodyTest();
+	//SoftBodyTest();
 
-	softBodyTest = new SoftBodyObject(softBodyMesh, world, basicTex, basicShader, Vector3(0, 0, 0), Vector3(20, 20, 20));
+	softBodyTest = new SoftBodyObject(softBodyMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .1f);
+	AddSphereToWorld(Vector3(0,50,50), 30.f, true, .01f);
 
 	//InitGameExamples();
 	InitDefaultFloor();
@@ -617,6 +612,11 @@ void TutorialGame::SpringTest(Vector3 anchorPosition, Vector3 bobPosition) {
 }
 
 void TutorialGame::SoftBodyTest() {
+	/*ParticleObject* anchor = new ParticleObject(Vector3(0, 40, 0), 3.f, false);
+	world->AddGameObject(anchor);
+	ParticleObject* bob = new ParticleObject(Vector3(0, 20, 0), 3.f, false);
+	world->AddGameObject(bob);
+	mTestSpring = new Spring(anchor, bob, 1.f, 50.f);*/
 	softBodyTest = new SoftBodyObject();
 	SoftBodyCubeTest(softBodyTest);
 }
@@ -640,31 +640,31 @@ void TutorialGame::SoftBodyCubeTest(SoftBodyObject* softBody) {
 	SoftBodyJoint* topTopRight = AddSoftBodyJoint(Vector3(75, 75, 75), 1);
 	softBody->AddJoint(topTopRight);
 
-	Spring* temp1 = new Spring(botBotLeft, botTopLeft, 0.01f, 50.f);
+	Spring* temp1 = new Spring(botBotLeft, botTopLeft, .1f, 50.f);
 	softBody->AddSpring(temp1);
-	Spring* temp2 = new Spring(botBotRight, botTopRight, 0.01f, 50.f);
+	Spring* temp2 = new Spring(botBotRight, botTopRight, .1f, 50.f);
 	softBody->AddSpring(temp2);
-	Spring* temp3 = new Spring(topBotLeft, topTopLeft, 0.01f, 50.f);
+	Spring* temp3 = new Spring(topBotLeft, topTopLeft, .1f, 50.f);
 	softBody->AddSpring(temp3);
-	Spring* temp4 = new Spring(topBotRight, topTopRight, 0.01f, 50.f);
+	Spring* temp4 = new Spring(topBotRight, topTopRight, .1f, 50.f);
 	softBody->AddSpring(temp4);
 
-	Spring* temp5 = new Spring(botBotLeft, topBotLeft, 0.01f, 50.f);
+	Spring* temp5 = new Spring(botBotLeft, topBotLeft, .1f, 50.f);
 	softBody->AddSpring(temp5);
-	Spring* temp6 = new Spring(botBotRight, topBotRight, 0.01f, 50.f);
+	Spring* temp6 = new Spring(botBotRight, topBotRight, .1f, 50.f);
 	softBody->AddSpring(temp6);
-	Spring* temp7 = new Spring(botTopLeft, topTopLeft, 0.01f, 50.f);
+	Spring* temp7 = new Spring(botTopLeft, topTopLeft, .1f, 50.f);
 	softBody->AddSpring(temp7);
-	Spring* temp8 = new Spring(botTopRight, topTopRight, 0.01f, 50.f);
+	Spring* temp8 = new Spring(botTopRight, topTopRight, .1f, 50.f);
 	softBody->AddSpring(temp8);
 
-	Spring* temp9 = new Spring(botBotLeft, botBotRight, 0.01f, 50.f);
+	Spring* temp9 = new Spring(botBotLeft, botBotRight, .1f, 50.f);
 	softBody->AddSpring(temp9);
-	Spring* temp10 = new Spring(botTopLeft, botTopRight, 0.01f, 50.f);
+	Spring* temp10 = new Spring(botTopLeft, botTopRight, .1f, 50.f);
 	softBody->AddSpring(temp10);
-	Spring* temp11 = new Spring(topBotLeft, topBotRight, 0.01f, 50.f);
+	Spring* temp11 = new Spring(topBotLeft, topBotRight, .1f, 50.f);
 	softBody->AddSpring(temp11);
-	Spring* temp12 = new Spring(topTopLeft, topTopRight, 0.01f, 50.f);
+	Spring* temp12 = new Spring(topTopLeft, topTopRight, .1f, 50.f);
 	softBody->AddSpring(temp12);
 
 	// support springs

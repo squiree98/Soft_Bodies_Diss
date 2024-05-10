@@ -7,7 +7,7 @@ class ParticleObject : public GameObject
 {
 public:
 	ParticleObject();
-	ParticleObject(Vector3 position, float radius);
+	ParticleObject(Vector3 position, float radius, bool applyGravity);
 	~ParticleObject();
 
 	const float GetRadius() { return mRadius; }
