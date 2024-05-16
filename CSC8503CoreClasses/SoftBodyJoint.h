@@ -18,8 +18,14 @@ public:
 
 	Vector3 GetBasePosition() { return basePosition; }
 
+	void SetBasePosition(Vector3 bP) { basePosition = bP; }
+
 protected:
 	Vector3 basePosition;
 
 	vector<int> vertexIndices;
+
+	float xyRotation;
+	float xzRotation;
+	float yzRotation;
 };

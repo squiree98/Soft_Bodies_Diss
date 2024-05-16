@@ -55,6 +55,8 @@ void TutorialGame::InitialiseAssets() {
 	enemyMesh	= renderer->LoadMesh("Keeper.msh");
 	bonusMesh	= renderer->LoadMesh("apple.msh");
 	cylinderMesh = renderer->LoadMesh("Cylinder.msh");
+	gooseMesh = renderer->LoadMesh("sphere.msh");
+	coinMesh = renderer->LoadMesh("coin.msh");
 
 	softBodyMesh = renderer->LoadMesh("sphere.msh");
 	softBofyMaterial = renderer->LoadMaterial("Role_T.mat");
@@ -84,6 +86,8 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
+	//Debug::Print(std::to_string(loops), Vector2(5, 5));
+	loops++;
 
 	softBodyTest->UpdateSoftBody(dt);
 
@@ -147,7 +151,14 @@ void TutorialGame::UpdateGame(float dt) {
 
 	world->UpdateWorld(dt);
 	renderer->Update(dt);
+
 	physics->Update(dt);
+
+	/*if (loops == 100) {
+		std::cout << "Average SoftBody Time: " << totalSoftBodyTime / loops << '\n';
+		std::cout << "Average Physics Time: " << totalPhysicsTime / loops << '\n';
+		std::cout << "done" << '\n';
+	}*/
 
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
@@ -272,16 +283,14 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-	// InitMixedGridWorld(5, 5, 3.5f, 3.5f);
-
 	// SpringTest(Vector3(100, 100, 0), Vector3(100, 0, 0));
 
-	//SoftBodyTest();
+	// SoftBodyTest();
 
-	softBodyTest = new SoftBodyObject(softBodyMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .1f);
-	AddSphereToWorld(Vector3(0,50,50), 30.f, true, .01f);
+	softBodyTest = new SoftBodyObject(softBodyMesh, world, basicTex, basicShader, Vector3(0, 0, 0), Vector3(30, 30, 30), .05f);
 
-	//InitGameExamples();
+	// DataCollection();
+
 	InitDefaultFloor();
 }
 
@@ -293,7 +302,7 @@ A single function to add a large immoveable cube to the bottom of our world
 GameObject* TutorialGame::AddFloorToWorld(const Vector3& position, const std::string& objectName) {
 	GameObject* floor = new GameObject(objectName);
 
-	Vector3 floorSize = Vector3(120, 2, 120);
+	Vector3 floorSize = Vector3(200, 20, 200);
 	AABBVolume* volume = new AABBVolume(floorSize);
 	floor->SetBoundingVolume((CollisionVolume*)volume);
 	floor->GetTransform()
@@ -517,7 +526,7 @@ StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position, co
 }
 
 void TutorialGame::InitDefaultFloor() {
-	AddFloorToWorld(Vector3(0, -100, 0), "Floor Object");
+	AddFloorToWorld(Vector3(0, -200, 0), "Floor Object");
 }
 
 void TutorialGame::InitGameExamples() {
@@ -676,6 +685,53 @@ void TutorialGame::SoftBodyCubeTest(SoftBodyObject* softBody) {
 	softBody->AddSpring(z);
 	Spring* a = new Spring(botTopLeft, topBotRight, .1f, 86.6f);
 	softBody->AddSpring(a);
+}
+
+void TutorialGame::DataCollection() {
+	std::cout << "Cube" << '\n';
+	SoftBodyObject* x = new SoftBodyObject(cubeMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .001f);
+	std::cout << x->GetAllJoints().size() << '\n';
+	std::cout << x->GetAllSprings().size() << '\n';
+
+	std::cout << "Cylinder" << '\n';
+	SoftBodyObject* x1 = new SoftBodyObject(cylinderMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .001f);
+	std::cout << x1->GetAllJoints().size() << '\n';
+	std::cout << x1->GetAllSprings().size() << '\n';
+
+	std::cout << "coin" << '\n';
+	SoftBodyObject* x2 = new SoftBodyObject(coinMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .001f);
+	std::cout << x2->GetAllJoints().size() << '\n';
+	std::cout << x2->GetAllSprings().size() << '\n';
+
+	std::cout << "apple" << '\n';
+	SoftBodyObject* x3 = new SoftBodyObject(bonusMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .001f);
+	std::cout << x3->GetAllJoints().size() << '\n';
+	std::cout << x3->GetAllSprings().size() << '\n';
+
+	std::cout << "Sphere" << '\n';
+	SoftBodyObject* x4 = new SoftBodyObject(sphereMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .001f);
+	std::cout << x4->GetAllJoints().size() << '\n';
+	std::cout << x4->GetAllSprings().size() << '\n';
+
+	std::cout << "capsule" << '\n';
+	SoftBodyObject* x5 = new SoftBodyObject(capsuleMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .001f);
+	std::cout << x5->GetAllJoints().size() << '\n';
+	std::cout << x5->GetAllSprings().size() << '\n';
+
+	std::cout << "goose" << '\n';
+	SoftBodyObject* x6 = new SoftBodyObject(gooseMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .001f);
+	std::cout << x6->GetAllJoints().size() << '\n';
+	std::cout << x6->GetAllSprings().size() << '\n';
+
+	std::cout << "goat" << '\n';
+	SoftBodyObject* x7 = new SoftBodyObject(charMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .001f);
+	std::cout << x7->GetAllJoints().size() << '\n';
+	std::cout << x7->GetAllSprings().size() << '\n';
+
+	std::cout << "keeper" << '\n';
+	SoftBodyObject* x8 = new SoftBodyObject(enemyMesh, world, basicTex, basicShader, Vector3(0, 50, 0), Vector3(30, 30, 30), .001f);
+	std::cout << x8->GetAllJoints().size() << '\n';
+	std::cout << x8->GetAllSprings().size() << '\n';
 }
 
 /*

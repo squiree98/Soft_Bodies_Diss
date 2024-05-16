@@ -6,13 +6,15 @@
 #include "Spring.h"
 #include "Shader.h"
 
+#include <chrono>
+
 using namespace NCL::CSC8503;
 
 class SoftBodyObject : public GameObject
 {
 public:
 	SoftBodyObject();
-	SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1), float springStrength = 1.f, float particleSize = 1.f);
+	SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1), float springStrength = 4.f, float particleSize = 1.f);
 	~SoftBodyObject();
 
 	// will update two things
@@ -23,6 +25,10 @@ public:
 	vector<SoftBodyJoint*> GetJoints() { return softBodyMeshJoints; }
 
 	vector<Spring*> GetSprings() { return softBodyMeshSprings; }
+
+	vector<SoftBodyJoint*> GetAllJoints() { return allJoints; }
+
+	vector<Spring*> GetAllSprings() { return softBodyAllSprings; }
 
 	SoftBodyJoint* GetJointWithVertIndex(int index);
 
@@ -37,9 +43,17 @@ protected:
 
 	void UpdateSprings(float dt) const;
 
+	void UpdateAveragePosition();
+
+	void UpdateAverageRotation();
+
 	void UpdateGPUData();
 
-	void UpdateAveragePositionAndAngle();
+	void PullJointsToBase();
+
+	void UpdatePressureModel();
+
+	vector<float> GetCurrentPressure();
 
 	void ConvertParticlesToVertices();
 
@@ -51,9 +65,13 @@ protected:
 
 	void EnforceMaxSpringLength(Spring* spring);
 
-	void GiveShapeVolume();
+	void CreateSupportSprings();
 
-	void CreateTonesOfSprings(bool showSprings);
+	void BruteForce(bool showSprings);
+
+	void SemiBruteForce(bool showSprings);
+
+	void SelectiveSupportSprings(bool showSprings);
 
 	SoftBodyJoint* GetFurthestAwayJoint(SoftBodyJoint* joint);
 
@@ -75,7 +93,7 @@ protected:
 	Vector3 averagePosition;
 	float averageAngle;
 
-	SoftBodyJoint* GetShapeCorners(bool lowX, bool lowY, bool lowZ);
+	SoftBodyJoint* GetShapeCorner(bool lowX, bool lowY, bool lowZ);
 
 	Vector3 basePosition;
 
@@ -84,7 +102,7 @@ protected:
 	vector<SoftBodyJoint*> extraSupportJoints;
 	vector<SoftBodyJoint*> allJoints;
 
-	// highest/lowest joints
+	// highest/lowest joints in body
 	std::map<std::string, SoftBodyJoint*> lowMaxJoints;
 
 	// used to update springs to move joints
@@ -93,8 +111,19 @@ protected:
 
 	GameWorld* currentWorld;
 
+	float pressure = 30;
+	float initialHeight;
+	float initialWidth;
+	float initialDepth;
+
 	float particleRadius;
 	float springConstant;
 
-	float maxSpringLength = 1000;
+	// use to add joints and springs to soft body
+	float maxSpringLength = 5000;
+
+	Transform softBodyTransform;
+
+	int loops;
+	std::chrono::nanoseconds totalTime;
 };

@@ -47,6 +47,8 @@ namespace NCL {
 			void SoftBodyTest();
 			void SoftBodyCubeTest(SoftBodyObject* softBody);
 
+			void DataCollection();
+
 			void InitDefaultFloor();
 
 			bool SelectObject();
@@ -89,6 +91,8 @@ namespace NCL {
 			Mesh*	cubeMesh	= nullptr;
 			Mesh*	sphereMesh	= nullptr;
 			Mesh*	cylinderMesh = nullptr;
+			Mesh*	gooseMesh = nullptr;
+			Mesh* coinMesh = nullptr;
 
 			Texture*	basicTex	= nullptr;
 			Shader*		basicShader = nullptr;
@@ -118,6 +122,8 @@ namespace NCL {
 
 			Spring* mTestSpring;
 			vector<Spring*> mTestSprings;
+
+			int loops = 0;
 		};
 	}
 }

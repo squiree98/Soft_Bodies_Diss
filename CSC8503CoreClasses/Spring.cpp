@@ -11,8 +11,8 @@ Spring::Spring(ParticleObject* anchor, ParticleObject* bob, float springConstant
 	mAnchor = anchor;
 	mBob = bob;
 
-	mRestLength = (mAnchor->GetTransform().GetPosition() - mBob->GetTransform().GetPosition()).Length();
 	mCurrentLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
+	mRestLength = mCurrentLength.Length();
 
 	mSpringConstant = springConstant;
 
@@ -40,29 +40,34 @@ Spring::~Spring()
 }
 
 void Spring::Update(float dt) {
-	//if (showDebugSpring) 
-		//NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), springColour);
-
 	mCurrentLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
 	
-	float displacement = mCurrentLength.Length() - (mRestLength/2);
+	float displacement = mCurrentLength.Length() - mRestLength;
 	displacement = abs(displacement);
+	if (displacement > 1.5f) {
+		// determine the direction of the springs force
+		Vector3 force;
+		switch (displacement > mRestLength/2) {
+		case(true):
+			force = -(mCurrentLength.Normalised());
+			break;
+		case(false):
+			force = mCurrentLength.Normalised();
+			break;
+		}
 
-	// determine the direction of the springs force
-	Vector3 force;
-	switch (displacement > (mRestLength/2)) {
-	case(true):
-		force = -(mCurrentLength.Normalised());
-		break;
-	case(false):
-		force = mCurrentLength.Normalised();
-		break;
+		force *= mSpringConstant * displacement;
+
+		mBob->GetPhysicsObject()->ApplyLinearImpulse(force);
+		mAnchor->GetPhysicsObject()->ApplyLinearImpulse(-force);
 	}
 
-	force *= mSpringConstant * displacement;
-
-	mBob->GetPhysicsObject()->ApplyLinearImpulse(force);
-	mAnchor->GetPhysicsObject()->ApplyLinearImpulse(-force);
+	if (showDebugSpring) {
+		NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), springColour);
+		/*std::cout << "\nDisplacement  : " << displacement << '\n';
+		std::cout << "Current Length: " << mCurrentLength.Length() << '\n';
+		std::cout << "Rest Length   : " << mRestLength << '\n';*/
+	}
 }
 
 Vector3 Spring::GetMidPoint() {
