@@ -111,7 +111,7 @@ protected:
 
 	GameWorld* currentWorld;
 
-	float pressure = 30;
+	float pressure = 150;
 	float initialHeight;
 	float initialWidth;
 	float initialDepth;

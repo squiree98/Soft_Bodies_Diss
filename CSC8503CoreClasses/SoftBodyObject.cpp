@@ -15,6 +15,7 @@ const bool useShapeMatching = false;
 constexpr bool usePressure = true;
 
 const float supportSpringMultiplier = 1.f;
+const float pressureForceScaler = 50;
 
 SoftBodyObject::SoftBodyObject() {}
 
@@ -143,6 +144,8 @@ void SoftBodyObject::UpdatePressureModel() {
 	for (SoftBodyJoint* joint : allJoints) {
 		// get direction
 		Vector3 force = (joint->GetTransform().GetPosition() - averagePosition).Normalised();
+		/*if (xPressure * yPressure * zPressure > initialWidth * initialHeight * initialDepth)
+			force = -force;*/
 		if (xPressure > initialWidth)
 			xPressure = -xPressure;
 		if (yPressure > initialHeight)
