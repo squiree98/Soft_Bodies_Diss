@@ -49,33 +49,23 @@ void Spring::Update(float dt) {
 	switch (displacement > mRestLength/2) {
 	case(true):
 		force = -(mCurrentLength.Normalised());
-		//NCL::Debug::DrawLine(mAnchor->GetTransform().GetPosition(), mBob->GetTransform().GetPosition(), NCL::Debug::RED);
 		break;
 	case(false):
 		force = mCurrentLength.Normalised();
-		//NCL::Debug::DrawLine(mAnchor->GetTransform().GetPosition(), mBob->GetTransform().GetPosition(), NCL::Debug::BLUE);
 		break;
 	}
 
+	// re-calculate displacement with full rest length as previous calculations must half rest length to account for there being two particles
 	displacement = mCurrentLength.Length() - mRestLength;
 	displacement = abs(displacement);
 
 	force *= mSpringConstant * displacement;
 
-	/*NCL::Debug::Print(std::to_string(mCurrentLength.Length()), Vector2(5,5));
-	NCL::Debug::Print(std::to_string(force.Length()), Vector2(5, 10));
-	NCL::Debug::Print(std::to_string(displacement), Vector2(5, 15));
-	NCL::Debug::Print(std::to_string(mCurrentLength.Length()), Vector2(5, 20));
-	NCL::Debug::Print(std::to_string(mRestLength), Vector2(5, 25));*/
-
 	mBob->GetPhysicsObject()->ApplyLinearImpulse(force);
 	mAnchor->GetPhysicsObject()->ApplyLinearImpulse(-force);		
 
 	if (showDebugSpring) {
-		//NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), springColour);
-		/*std::cout << "\nDisplacement  : " << displacement << '\n';
-		std::cout << "Current Length: " << mCurrentLength.Length() << '\n';
-		std::cout << "Rest Length   : " << mRestLength << '\n';*/
+		NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), springColour);
 	}
 }
 

@@ -26,7 +26,7 @@ class SoftBodyObject : public GameObject
 public:
 	SoftBodyObject();
 	SoftBodyObject(	SupportMethod supportMethod, NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1),
-					float springStrength = 4.f, float maxSpringLength = FLT_MAX, float particleSize = 1.f);
+					float springStrength = 4.f, float particleSize = 1.f, float maxSpringLength = FLT_MAX);
 	~SoftBodyObject();
 
 	// will update two things

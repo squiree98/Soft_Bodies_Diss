@@ -126,8 +126,6 @@ namespace NCL {
 
 			Spring* mTestSpring;
 			vector<Spring*> mTestSprings;
-
-			int loops = 0;
 		};
 	}
 }

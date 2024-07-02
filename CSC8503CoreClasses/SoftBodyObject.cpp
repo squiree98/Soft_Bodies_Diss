@@ -14,7 +14,7 @@ const float pressureForceScaler = 125;
 
 SoftBodyObject::SoftBodyObject() {}
 
-SoftBodyObject::SoftBodyObject(SupportMethod supportMethod, NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position, Vector3 scale, float springStrength, float newMaxSpringLength, float particleSize) {
+SoftBodyObject::SoftBodyObject(SupportMethod supportMethod, NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position, Vector3 scale, float springStrength, float particleSize, float newMaxSpringLength) {
 	supportMethodUsed = supportMethod;
 	maxSpringLength = newMaxSpringLength;
 	basePosition = position;

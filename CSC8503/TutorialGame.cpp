@@ -89,15 +89,11 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
-	//Debug::Print(std::to_string(loops), Vector2(5, 5));
-	loops++;
 
-	//softBodyTest->UpdateSoftBody(dt);
 	for (SoftBodyObject* x : softBodies) {
 		x->UpdateSoftBody(dt);
 	}
 
-	//mTestSpring->Update(dt);
 
 	if (!inSelectionMode) {
 		world->GetMainCamera().UpdateCamera(dt);
@@ -148,9 +144,10 @@ void TutorialGame::UpdateGame(float dt) {
 		}
 	}
 	// draw Axis
-	/*Debug::DrawLine(Vector3(), Vector3(0, 100, 0), Debug::RED);
+	Debug::DrawLine(Vector3(), Vector3(0, 100, 0), Debug::RED);
 	Debug::DrawLine(Vector3(), Vector3(100, 0, 0), Debug::BLUE);
-	Debug::DrawLine(Vector3(), Vector3(0, 0, 100), Debug::GREEN);*/
+	Debug::DrawLine(Vector3(), Vector3(0, 0, 100), Debug::GREEN);
+
 	SelectObject();
 	MoveSelectedObject();
 
@@ -161,12 +158,6 @@ void TutorialGame::UpdateGame(float dt) {
 	renderer->Update(dt);
 
 	physics->Update(dt);
-
-	/*if (loops == 100) {
-		std::cout << "Average SoftBody Time: " << totalSoftBodyTime / loops << '\n';
-		std::cout << "Average Physics Time: " << totalPhysicsTime / loops << '\n';
-		std::cout << "done" << '\n';
-	}*/
 
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
@@ -280,7 +271,7 @@ void TutorialGame::DebugObjectMovement() {
 
 void TutorialGame::InitCamera() {
 	world->GetMainCamera().SetNearPlane(0.1f);
-	world->GetMainCamera().SetFarPlane(500.0f);
+	world->GetMainCamera().SetFarPlane(1500.0f);
 	world->GetMainCamera().SetPitch(0);
 	world->GetMainCamera().SetYaw(0);
 	world->GetMainCamera().SetPosition(Vector3(0, 0, 300));
@@ -291,24 +282,11 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-	// SpringTest(Vector3(100, -20, 0), Vector3(100, -70, 0));
-
-	// SoftBodyTest();
-
-	//softBodyTest = new SoftBodyObject(SupportMethod::None, softBodyMesh, world, basicTex, basicShader, Vector3(0, 0, 0), Vector3(30, 30, 30), 2.5f);
-
-	SupportMethod supportMethod = SupportMethod::BasicPressure;
-
-	//softBodies.push_back(new SoftBodyObject(supportMethod, cubeMesh, world, basicTex, basicShader, Vector3(-150, 0, 0), Vector3(30, 30, 30), .5f, 40));
-
-	softBodies.push_back(new SoftBodyObject(BasicPressure,				sphereMesh, world, basicTex, basicShader, Vector3(-150, 0, 0), Vector3(15, 15, 15), 2.f));
-	softBodies.push_back(new SoftBodyObject(VolumePressure,				sphereMesh2, world, basicTex, basicShader, Vector3(0  , 0, 0), Vector3(15, 15, 15), 2.f));
-	softBodies.push_back(new SoftBodyObject(SeparateAxisVolumePressure, sphereMesh3, world, basicTex, basicShader, Vector3(150, 0, 0), Vector3(15, 15, 15), 2.f));
-
-	//softBodies.push_back(new SoftBodyObject(supportMethod, capsuleMesh, world, basicTex, basicShader, Vector3(50, 0, 0), Vector3(30, 30, 30), 2.2f, 20));
-	//softBodies.push_back(new SoftBodyObject(supportMethod, gooseMesh, world, basicTex, basicShader, Vector3(150, 0, 0), Vector3(30, 30, 30), .8f));
-
-	// DataCollection();
+	softBodies.push_back(new SoftBodyObject(None, cubeMesh, world, basicTex, basicShader, Vector3(-200, 0, 0), Vector3(15, 15, 15), 2.f));
+	softBodies.push_back(new SoftBodyObject(None, sphereMesh, world, basicTex, basicShader, Vector3(-100  , 0, 0), Vector3(15, 15, 15), 2.f));
+	softBodies.push_back(new SoftBodyObject(None, cylinderMesh, world, basicTex, basicShader, Vector3(0, 0, 0), Vector3(15, 15, 15), 2.f));
+	softBodies.push_back(new SoftBodyObject(None, capsuleMesh, world, basicTex, basicShader, Vector3(100, 0, 0), Vector3(30, 30, 30), 2.f));
+	softBodies.push_back(new SoftBodyObject(None, gooseMesh, world, basicTex, basicShader, Vector3(200, 0, 0), Vector3(30, 30, 30), 2.f));
 
 	InitDefaultFloor();
 }
