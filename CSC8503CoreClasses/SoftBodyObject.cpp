@@ -8,18 +8,15 @@
 #include "Debug.h"
 #include "PhysicsObject.h"
 
-const bool useBruteForce = false;
-const bool useSemiBruteForce = false;
-const bool useSelectiveMethod = false;
-const bool useShapeMatching = false;
-constexpr bool usePressure = true;
-
 const float supportSpringMultiplier = 1.f;
-const float pressureForceScaler = 50;
+const float shapeMatchingStrength = 5.f;
+const float pressureForceScaler = 125;
 
 SoftBodyObject::SoftBodyObject() {}
 
-SoftBodyObject::SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position, Vector3 scale, float springStrength, float particleSize) {
+SoftBodyObject::SoftBodyObject(SupportMethod supportMethod, NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position, Vector3 scale, float springStrength, float newMaxSpringLength, float particleSize) {
+	supportMethodUsed = supportMethod;
+	maxSpringLength = newMaxSpringLength;
 	basePosition = position;
 
 	// transform is only used for orientation so it set to default values
@@ -63,10 +60,16 @@ void SoftBodyObject::UpdateSoftBody(float dt) {
 
 	UpdateAveragePosition();
 
-	if (usePressure)
-		UpdatePressureModel();
+	if (supportMethodUsed == BasicPressure)
+		UpdateBasicPressureModel();
 
-	if (useShapeMatching)
+	if (supportMethodUsed == VolumePressure)
+		UpdateVolumePressureModel();
+
+	if (supportMethodUsed == SeparateAxisVolumePressure)
+		UpdateAxisVolumePressureModel();
+
+	if (supportMethodUsed == ShapeMatching)
 		PullJointsToBase();
 
 	ConvertParticlesToVertices();
@@ -119,8 +122,7 @@ void SoftBodyObject::UpdateGPUData() {
 }
 
 void SoftBodyObject::PullJointsToBase() {
-	UpdateAveragePosition();
-	UpdateAverageRotation();
+	// UpdateAverageRotation();
 
 	for (SoftBodyJoint* joint : allJoints) {
 		Vector3 jointCurrentOffset = joint->GetTransform().GetPosition() - (averagePosition + basePosition);
@@ -128,13 +130,24 @@ void SoftBodyObject::PullJointsToBase() {
 
 		Vector3 force = jointBaseOffset - jointCurrentOffset;
 
-		joint->GetPhysicsObject()->AddForce(force * 3);
+		joint->GetPhysicsObject()->AddForce(force * shapeMatchingStrength);
 
 		NCL::Debug::DrawLine(joint->GetTransform().GetPosition(), joint->GetTransform().GetPosition() + force, NCL::Debug::YELLOW);
 	}
 }
 
-void SoftBodyObject::UpdatePressureModel() {
+void SoftBodyObject::UpdateBasicPressureModel() {
+	for (SoftBodyJoint* joint : allJoints) {
+		// get outwards direction
+		Vector3 force = (joint->GetTransform().GetPosition() - averagePosition).Normalised();
+
+		joint->GetPhysicsObject()->AddForce(force * pressureForceScaler);
+
+		NCL::Debug::DrawLine(joint->GetTransform().GetPosition(), joint->GetTransform().GetPosition() + force, NCL::Debug::RED);
+	}
+}
+
+void SoftBodyObject::UpdateVolumePressureModel() {
 	vector<float> currentVolume = GetCurrentPressure();
 	float yPressure = abs(initialHeight - currentVolume[0]);
 	float xPressure = abs(initialWidth - currentVolume[1]);
@@ -142,10 +155,29 @@ void SoftBodyObject::UpdatePressureModel() {
 
 
 	for (SoftBodyJoint* joint : allJoints) {
-		// get direction
+		// get outwards direction
 		Vector3 force = (joint->GetTransform().GetPosition() - averagePosition).Normalised();
-		/*if (xPressure * yPressure * zPressure > initialWidth * initialHeight * initialDepth)
-			force = -force;*/
+		if (xPressure * yPressure * zPressure > initialWidth * initialHeight * initialDepth)
+			force = -force;
+
+		joint->GetPhysicsObject()->AddForce(force * pressureForceScaler);
+
+		NCL::Debug::DrawLine(joint->GetTransform().GetPosition(), joint->GetTransform().GetPosition() + force, NCL::Debug::YELLOW);
+	}
+}
+
+void SoftBodyObject::UpdateAxisVolumePressureModel() {
+	vector<float> currentVolume = GetCurrentPressure();
+	float yPressure = abs(initialHeight - currentVolume[0]);
+	float xPressure = abs(initialWidth - currentVolume[1]);
+	float zPressure = abs(initialDepth - currentVolume[2]);
+
+	Vector3 totalForce = Vector3(0, 0, 0);
+
+	for (SoftBodyJoint* joint : allJoints) {
+		// get outward direction
+		Vector3 force = (joint->GetTransform().GetPosition() - averagePosition).Normalised();
+
 		if (xPressure > initialWidth)
 			xPressure = -xPressure;
 		if (yPressure > initialHeight)
@@ -154,13 +186,15 @@ void SoftBodyObject::UpdatePressureModel() {
 			zPressure = -zPressure;
 
 
-		force.x *= xPressure * 2.5f;
-		force.y *= yPressure * 2.5f;
-		force.z *= zPressure * 2.5f;
+		force.x *= xPressure;
+		force.y *= yPressure;
+		force.z *= zPressure;
 
-		joint->GetPhysicsObject()->AddForce(force);
+		force.Normalise();
 
-		//NCL::Debug::DrawLine(joint->GetTransform().GetPosition(), joint->GetTransform().GetPosition() + force);
+		joint->GetPhysicsObject()->AddForce(force * pressureForceScaler);
+
+		NCL::Debug::DrawLine(joint->GetTransform().GetPosition(), joint->GetTransform().GetPosition() + force, NCL::Debug::BLUE);
 	}
 }
 
@@ -233,7 +267,7 @@ void SoftBodyObject::CreateBodyVertices(NCL::Mesh* mesh, Vector3 position, Vecto
 		if (!CheckVectorHasValue(previousPositions, vertPos)) {
 			// doesn't exist in soft body
 			previousPositions.push_back(vertPos);
-			SoftBodyJoint* joint = new SoftBodyJoint(vertPos, particleRadius, currentWorld);
+			SoftBodyJoint* joint = new SoftBodyJoint(vertPos, particleRadius, currentWorld, basePosition);
 			joint->AddVertIndex(counter);
 			AddJoint(joint);
 		}
@@ -270,7 +304,7 @@ void SoftBodyObject::CreateBodySprings(NCL::Mesh* mesh) {
 
 void SoftBodyObject::EnforceMaxSpringLength(Spring* spring) {
 	if (spring->GetLength() > maxSpringLength) {
-		SoftBodyJoint* supportJoint = new SoftBodyJoint(spring->GetMidPoint(), particleRadius, currentWorld);
+		SoftBodyJoint* supportJoint = new SoftBodyJoint(spring->GetMidPoint(), particleRadius, currentWorld, basePosition);
 		Spring* newSpring1 = new Spring(spring->GetAnchor(), supportJoint, springConstant, true, NCL::Debug::BLUE);
 		Spring* newSpring2 = new Spring(spring->GetBob(), supportJoint, springConstant, true, NCL::Debug::GREEN);
 		extraSupportJoints.push_back(supportJoint);
@@ -285,13 +319,13 @@ void SoftBodyObject::EnforceMaxSpringLength(Spring* spring) {
 void SoftBodyObject::CreateSupportSprings() {
 	springConstant *= supportSpringMultiplier;
 
-	if (useBruteForce)
+	if (supportMethodUsed == SupportMethod::BruteForce)
 		BruteForce(true);
 
-	if (useSemiBruteForce)
+	if (supportMethodUsed == SupportMethod::SemiBruteForce)
 		SemiBruteForce(true);
 
-	if(useSelectiveMethod)
+	if(supportMethodUsed == Selective)
 		SelectiveSupportSprings(true);
 }
 

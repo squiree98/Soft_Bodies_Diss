@@ -42,28 +42,37 @@ Spring::~Spring()
 void Spring::Update(float dt) {
 	mCurrentLength = mBob->GetTransform().GetPosition() - mAnchor->GetTransform().GetPosition();
 	
-	float displacement = mCurrentLength.Length() - mRestLength;
+	float displacement = mCurrentLength.Length() - mRestLength/2;
 	displacement = abs(displacement);
-	if (displacement > 1.5f) {
-		// determine the direction of the springs force
-		Vector3 force;
-		switch (displacement > mRestLength/2) {
-		case(true):
-			force = -(mCurrentLength.Normalised());
-			break;
-		case(false):
-			force = mCurrentLength.Normalised();
-			break;
-		}
-
-		force *= mSpringConstant * displacement;
-
-		mBob->GetPhysicsObject()->ApplyLinearImpulse(force);
-		mAnchor->GetPhysicsObject()->ApplyLinearImpulse(-force);
+	// determine the direction of the springs force
+	Vector3 force;
+	switch (displacement > mRestLength/2) {
+	case(true):
+		force = -(mCurrentLength.Normalised());
+		//NCL::Debug::DrawLine(mAnchor->GetTransform().GetPosition(), mBob->GetTransform().GetPosition(), NCL::Debug::RED);
+		break;
+	case(false):
+		force = mCurrentLength.Normalised();
+		//NCL::Debug::DrawLine(mAnchor->GetTransform().GetPosition(), mBob->GetTransform().GetPosition(), NCL::Debug::BLUE);
+		break;
 	}
 
+	displacement = mCurrentLength.Length() - mRestLength;
+	displacement = abs(displacement);
+
+	force *= mSpringConstant * displacement;
+
+	/*NCL::Debug::Print(std::to_string(mCurrentLength.Length()), Vector2(5,5));
+	NCL::Debug::Print(std::to_string(force.Length()), Vector2(5, 10));
+	NCL::Debug::Print(std::to_string(displacement), Vector2(5, 15));
+	NCL::Debug::Print(std::to_string(mCurrentLength.Length()), Vector2(5, 20));
+	NCL::Debug::Print(std::to_string(mRestLength), Vector2(5, 25));*/
+
+	mBob->GetPhysicsObject()->ApplyLinearImpulse(force);
+	mAnchor->GetPhysicsObject()->ApplyLinearImpulse(-force);		
+
 	if (showDebugSpring) {
-		NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), springColour);
+		//NCL::Debug::DrawLine(mBob->GetTransform().GetPosition(), mAnchor->GetTransform().GetPosition(), springColour);
 		/*std::cout << "\nDisplacement  : " << displacement << '\n';
 		std::cout << "Current Length: " << mCurrentLength.Length() << '\n';
 		std::cout << "Rest Length   : " << mRestLength << '\n';*/

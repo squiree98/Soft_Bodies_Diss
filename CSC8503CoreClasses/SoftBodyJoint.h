@@ -8,7 +8,7 @@ class SoftBodyJoint : public ParticleObject
 {
 public:
 	SoftBodyJoint();
-	SoftBodyJoint(Vector3 position, float radius, GameWorld* world);
+	SoftBodyJoint(Vector3 position, float radius, GameWorld* world, Vector3 softBodyBasePosition = Vector3(0,0,0));
 	~SoftBodyJoint();
 
 	void DrawDebugJoint();

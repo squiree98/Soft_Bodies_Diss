@@ -89,7 +89,10 @@ namespace NCL {
 
 			Mesh*	capsuleMesh = nullptr;
 			Mesh*	cubeMesh	= nullptr;
+			Mesh*	floorMesh = nullptr;
 			Mesh*	sphereMesh	= nullptr;
+			Mesh*	sphereMesh2 = nullptr;
+			Mesh*	sphereMesh3 = nullptr;
 			Mesh*	cylinderMesh = nullptr;
 			Mesh*	gooseMesh = nullptr;
 			Mesh* coinMesh = nullptr;
@@ -105,6 +108,7 @@ namespace NCL {
 
 			// soft bodies mesh
 			SoftBodyObject* softBodyTest = nullptr;
+			vector<SoftBodyObject*> softBodies;
 			Mesh* softBodyMesh	= nullptr;
 			MeshMaterial* softBofyMaterial = nullptr;
 			MeshAnimation* tempAnim = nullptr;

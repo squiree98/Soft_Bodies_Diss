@@ -10,17 +10,31 @@
 
 using namespace NCL::CSC8503;
 
+enum SupportMethod {
+	None,
+	BruteForce,
+	SemiBruteForce,
+	Selective,
+	ShapeMatching,
+	BasicPressure,
+	VolumePressure,
+	SeparateAxisVolumePressure
+};
+
 class SoftBodyObject : public GameObject
 {
 public:
 	SoftBodyObject();
-	SoftBodyObject(NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1), float springStrength = 4.f, float particleSize = 1.f);
+	SoftBodyObject(	SupportMethod supportMethod, NCL::Mesh* mesh, GameWorld* world, NCL::Texture* texture, NCL::Shader* shader, Vector3 position = Vector3(0, 0, 0), Vector3 scale = Vector3(1, 1, 1),
+					float springStrength = 4.f, float maxSpringLength = FLT_MAX, float particleSize = 1.f);
 	~SoftBodyObject();
 
 	// will update two things
 	// 1- ensure joints match vertices positions
 	// 2- update springs on object
 	void UpdateSoftBody(float dt);
+
+	const Vector3 GetAveragePosition() const { return averagePosition; }
 
 	vector<SoftBodyJoint*> GetJoints() { return softBodyMeshJoints; }
 
@@ -36,7 +50,7 @@ public:
 		softBodyMeshJoints.push_back(joint);
 	}
 
-	void AddSpring(Spring* spring) { softBodyMeshSprings.push_back(spring); }
+	void AddSpring(Spring* spring) { softBodyAllSprings.push_back(spring); }
 
 
 protected:
@@ -51,7 +65,11 @@ protected:
 
 	void PullJointsToBase();
 
-	void UpdatePressureModel();
+	void UpdateBasicPressureModel();
+
+	void UpdateVolumePressureModel();
+
+	void UpdateAxisVolumePressureModel();
 
 	vector<float> GetCurrentPressure();
 
@@ -120,10 +138,12 @@ protected:
 	float springConstant;
 
 	// use to add joints and springs to soft body
-	float maxSpringLength = 5000;
+	float maxSpringLength;
 
 	Transform softBodyTransform;
 
 	int loops;
 	std::chrono::nanoseconds totalTime;
+
+	SupportMethod supportMethodUsed;
 };
