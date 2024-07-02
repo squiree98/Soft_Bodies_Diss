@@ -11,7 +11,8 @@ SoftBodyJoint::SoftBodyJoint() {
 	mRadius = 0;
 }
 
-SoftBodyJoint::SoftBodyJoint(Vector3 position, float radius, GameWorld* world) {
+SoftBodyJoint::SoftBodyJoint(Vector3 position, float radius, GameWorld* world, Vector3 softBodyBasePosition, float particleMass) {
+	basePosition = position - softBodyBasePosition;
 	Vector3 particleSize = Vector3(radius, radius, radius);
 	NCL::SphereVolume* volume = new NCL::SphereVolume(radius, true);
 	SetBoundingVolume((NCL::CollisionVolume*)volume);
@@ -22,7 +23,7 @@ SoftBodyJoint::SoftBodyJoint(Vector3 position, float radius, GameWorld* world) {
 
 	SetPhysicsObject(new PhysicsObject(&GetTransform(), GetBoundingVolume(), true));
 
-	GetPhysicsObject()->SetInverseMass(1);
+	GetPhysicsObject()->SetInverseMass(particleMass);
 	GetPhysicsObject()->InitSphereInertia(false);
 
 	world->AddGameObject(this);
@@ -32,4 +33,8 @@ SoftBodyJoint::SoftBodyJoint(Vector3 position, float radius, GameWorld* world) {
 
 SoftBodyJoint::~SoftBodyJoint() {
 
+}
+
+void SoftBodyJoint::DrawDebugJoint() {
+	NCL::Debug::DrawLine(transform.GetPosition(), Vector3(0, 0, 0));
 }

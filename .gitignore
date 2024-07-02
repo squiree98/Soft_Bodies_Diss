@@ -5,6 +5,7 @@
 *.vcxproj.filters
 *.vcxproj.user
 *.sln
+*Release
 
 /.vs/CSC8503/FileContentIndex/read.lock
 /.vs

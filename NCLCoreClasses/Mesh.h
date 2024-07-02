@@ -197,6 +197,8 @@ namespace NCL::Rendering {
 		void SetDebugName(const std::string& debugName);
 
 		virtual void UploadToGPU(Rendering::RendererBase* renderer = nullptr) = 0;
+		virtual void UpdateGPUPositionData(unsigned int startVertex, unsigned int vertexCount) = 0;
+		virtual void UpdateGPUBuffers(unsigned int startVertex, unsigned int vertexCount) = 0;
 
 		uint32_t GetAssetID() const {
 			return assetID;

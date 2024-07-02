@@ -93,6 +93,14 @@ void OGLMesh::UploadToGPU(Rendering::RendererBase* renderer) {
 	glBindVertexArray(0);
 }
 
+void OGLMesh::UpdateGPUPositionData(unsigned int startVertex, unsigned int vertexCount) {
+	if (!GetPositionData().empty()) {
+		glBindBuffer(GL_ARRAY_BUFFER, attributeBuffers[VertexAttribute::Positions]);
+		glBufferSubData(GL_ARRAY_BUFFER, startVertex * sizeof(Vector3), vertexCount * sizeof(Vector3), (char*)&GetPositionData()[startVertex]);
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 void OGLMesh::UpdateGPUBuffers(unsigned int startVertex, unsigned int vertexCount) {
 	if (!GetPositionData().empty()) {
 		glBindBuffer(GL_ARRAY_BUFFER, attributeBuffers[VertexAttribute::Positions]);

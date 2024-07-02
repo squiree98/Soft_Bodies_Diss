@@ -83,6 +83,10 @@ namespace NCL::Maths {
 			return Vector3((a.y*b.z) - (a.z*b.y), (a.z*b.x) - (a.x*b.z), (a.x*b.y) - (a.y*b.x));
 		}
 
+		static std::string Print(const Vector3& v) {
+			return "Vector3(" + std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z) + ")";
+		}
+
 		inline Vector3  operator+(const Vector3& a) const {
 			return Vector3(x + a.x, y + a.y, z + a.z);
 		}
